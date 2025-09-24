@@ -16,7 +16,9 @@ import {
   Settings,
   LogOut,
   Activity,
-  Utensils
+  Utensils,
+  Bot,
+  UtensilsCrossed
 } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
 
@@ -56,9 +58,21 @@ export function WebsiteLayout({ children }: WebsiteLayoutProps) {
       current: location.pathname.startsWith("/assessment")
     },
     { 
+      name: "Food Library", 
+      href: "/food-library", 
+      icon: UtensilsCrossed,
+      current: location.pathname.startsWith("/food-library")
+    },
+    { 
       name: "Compliance", 
       href: "/compliance", 
       icon: ChartBar,
+      current: location.pathname === "/compliance"
+    },
+    { 
+      name: "AyurBot", 
+      href: "/ayurbot", 
+      icon: Bot,
       current: location.pathname === "/compliance"
     },
     { 

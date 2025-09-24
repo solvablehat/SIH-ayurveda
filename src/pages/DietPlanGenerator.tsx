@@ -62,7 +62,7 @@ export default function DietPlanGenerator() {
 
   const foodCategories = [
     { name: 'Grains & Cereals', icon: '🌾' },
-    { name: 'Vegetables', icon: '🥬' },
+    { name: 'Vegetables - Leafy Greens', icon: '🥬' },
     { name: 'Fruits', icon: '🍎' },
     { name: 'Legumes & Beans', icon: '🫘' },
     { name: 'Dairy Products', icon: '🥛' },

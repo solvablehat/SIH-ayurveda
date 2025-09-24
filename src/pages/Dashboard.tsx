@@ -2,6 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { patientService } from "@/services/patientService";
 import { DashboardWidget, MetricCard, QuickAction } from "@/components/DashboardWidget";
+import { Button } from "@/components/ui/button";
+import AyurBot from "@/components/AyurBot";
 import { 
   ComplianceChart, 
   PatientGrowthChart, 
@@ -18,11 +20,18 @@ import {
   Users,
   CheckCircle,
   ArrowUpRight,
-  Target
+  Target,
+  BookOpen,
+  Bot,
+  MessageCircle
 } from "lucide-react";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  
+  // AyurBot state
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isChatMinimized, setIsChatMinimized] = useState(false);
   
   // State for real data
   const [dashboardData, setDashboardData] = useState({
@@ -278,7 +287,7 @@ export default function Dashboard() {
               icon={<UserPlus className="h-5 w-5" />}
               label="Add New Patient"
               description="Create a new patient profile"
-              onClick={() => navigate('/patients/new')}
+              onClick={() => navigate('/patients/add')}
               variant="primary"
             />
             
@@ -297,9 +306,48 @@ export default function Dashboard() {
               onClick={() => navigate('/assessment/new')}
               variant="secondary"
             />
+            
+            <QuickAction
+              icon={<BookOpen className="h-5 w-5" />}
+              label="Food Library"
+              description="Ayurvedic food database"
+              onClick={() => navigate('/food-library')}
+              variant="secondary"
+            />
+            
+            <QuickAction
+              icon={<Bot className="h-5 w-5" />}
+              label="AyurBot Assistant"
+              description="AI-powered Ayurvedic guidance"
+              onClick={() => navigate('/ayurbot')}
+              variant="secondary"
+            />
           </div>
         </DashboardWidget>
       </div>
+
+      {/* Floating AyurBot Button */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <Button
+          onClick={() => setIsChatOpen(!isChatOpen)}
+          className="h-14 w-14 rounded-full shadow-lg bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 transition-all duration-200"
+          size="lg"
+        >
+          {isChatOpen ? (
+            <MessageCircle className="h-6 w-6" />
+          ) : (
+            <Bot className="h-6 w-6" />
+          )}
+        </Button>
+      </div>
+
+      {/* AyurBot Chat Component */}
+      <AyurBot 
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        isMinimized={isChatMinimized}
+        onToggleMinimize={() => setIsChatMinimized(!isChatMinimized)}
+      />
     </div>
   );
 }

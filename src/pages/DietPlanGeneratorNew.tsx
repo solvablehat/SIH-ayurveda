@@ -17,7 +17,8 @@ import {
   Leaf
 } from "lucide-react";
 import { patientService, Patient } from "@/services/patientService";
-import { foodDatabase, ayurvedicPrinciples } from "@/data/foods";
+import { ayurvedicPrinciples } from "@/data/foods";
+import { foodLibraryService } from "@/services/foodLibraryService";
 
 // Patient Selector Component
 function PatientSelector({ selectedPatient, onSelect }: { 
@@ -495,57 +496,31 @@ export default function DietPlanGenerator() {
     return 'kapha';
   };
 
-  // Smart meal generation based on dosha compatibility
+  // Smart meal generation based on dosha compatibility using Food Library
   const generateMeals = (timeOfDay: string, dosha: any, preferences: any) => {
     const primaryDosha = getPrimaryDosha(dosha);
     
-    // Filter foods based on dosha compatibility (70% threshold as per spec)
-    const suitableFoods = foodDatabase.filter(food => 
-      food.doshaEffects[primaryDosha as keyof typeof food.doshaEffects] >= 0.7
-    );
+    // Get foods suitable for the primary dosha (70% threshold)
+    const suitableFoods = foodLibraryService.getFoodsForDosha(primaryDosha, 0.7);
+    
+    // Filter foods based on dietary preferences and allergies
+    const filteredFoods = foodLibraryService.filterByPreferences(suitableFoods, preferences);
 
-    // Further filter based on dietary preferences
-    let filteredFoods = suitableFoods;
-    if (preferences.allergies?.includes('Dairy')) {
-      filteredFoods = filteredFoods.filter(f => f.category !== 'dairy');
-    }
-    if (preferences.allergies?.includes('Nuts')) {
-      filteredFoods = filteredFoods.filter(f => f.category !== 'nuts');
-    }
-    if (preferences.allergies?.includes('Gluten')) {
-      filteredFoods = filteredFoods.filter(f => f.name !== 'Wheat');
-    }
-
-    const grains = filteredFoods.filter(f => f.category === 'grains');
-    const proteins = filteredFoods.filter(f => f.category === 'proteins');
-    const vegetables = filteredFoods.filter(f => f.category === 'vegetables');
-    const spices = filteredFoods.filter(f => f.category === 'spices');
-    const fruits = filteredFoods.filter(f => f.category === 'fruits');
-
-    // Select random suitable foods for variety
-    const selectRandomFood = (foods: any[], count = 1) => {
-      if (foods.length === 0) return [];
-      const shuffled = [...foods].sort(() => 0.5 - Math.random());
-      return shuffled.slice(0, count);
-    };
-
-    const getRecommendedSpices = (dosha: string, time: string) => {
-      const doshaSpices = {
-        vata: ['Ginger', 'Cinnamon', 'Cardamom', 'Cumin'],
-        pitta: ['Coriander', 'Fennel', 'Mint', 'Cumin'],
-        kapha: ['Black Pepper', 'Ginger', 'Turmeric', 'Mustard Seeds']
-      };
-      return doshaSpices[dosha as keyof typeof doshaSpices] || [];
-    };
+    // Categorize foods
+    const grains = filteredFoods.filter(f => f.category === 'Grains & Cereals');
+    const proteins = filteredFoods.filter(f => f.category === 'Legumes & Beans');
+    const vegetables = filteredFoods.filter(f => f.category === 'Vegetables');
+    const spices = filteredFoods.filter(f => f.category === 'Spices & Herbs');
+    const fruits = filteredFoods.filter(f => f.category === 'Fruits');
 
     if (timeOfDay === 'morning') {
-      const selectedGrain = selectRandomFood(grains)[0];
-      const selectedSpices = getRecommendedSpices(primaryDosha, 'morning');
+      const selectedGrain = foodLibraryService.getRandomSelection(grains, 1)[0];
+      const selectedSpices = foodLibraryService.getRecommendedSpices(primaryDosha);
       
       return {
         main: selectedGrain?.name || "Oats",
         protein: "Soaked almonds (5-6)",
-        vegetables: selectRandomFood(vegetables, 1)[0]?.name || "Seasonal vegetables",
+        vegetables: foodLibraryService.getRandomSelection(vegetables, 1)[0]?.name || "Seasonal vegetables",
         spices: selectedSpices.slice(0, 2),
         preparation: `Cook ${selectedGrain?.name || 'oats'} with ${selectedSpices.join(', ')} and ghee. ${selectedGrain?.preparationTips || 'Serve warm'}.`,
         ayurvedicNote: `${selectedGrain?.ayurvedicBenefits || 'Provides sustained energy'} - Perfect for ${primaryDosha} constitution.`
@@ -553,30 +528,30 @@ export default function DietPlanGenerator() {
     }
 
     if (timeOfDay === 'afternoon') {
-      const selectedGrain = selectRandomFood(grains.filter(g => g.name !== 'Oats'))[0];
-      const selectedProtein = selectRandomFood(proteins)[0];
-      const selectedVegetables = selectRandomFood(vegetables, 2);
+      const selectedGrain = foodLibraryService.getRandomSelection(grains.filter(g => g.name !== 'Oats'), 1)[0];
+      const selectedProtein = foodLibraryService.getRandomSelection(proteins, 1)[0];
+      const selectedVegetables = foodLibraryService.getRandomSelection(vegetables, 2);
       
       return {
         main: selectedGrain?.name || "Basmati Rice",
         protein: selectedProtein?.name || "Mung Dal", 
         vegetables: selectedVegetables.map(v => v.name).join(' and ') || "Seasonal vegetables",
-        spices: getRecommendedSpices(primaryDosha, 'afternoon').slice(0, 3),
+        spices: foodLibraryService.getRecommendedSpices(primaryDosha).slice(0, 3),
         preparation: `${selectedProtein?.preparationTips || 'Cook well with spices'}. ${selectedGrain?.preparationTips || 'Serve with ghee'}.`,
         ayurvedicNote: `${selectedProtein?.ayurvedicBenefits || 'Provides essential proteins'} Main meal should be largest of the day.`
       };
     }
 
     // Evening
-    const selectedGrain = selectRandomFood(grains.filter(g => g.gunas?.includes('Light')))[0];
-    const selectedProtein = selectRandomFood(proteins.filter(p => p.category === 'proteins'))[0];
-    const selectedVegetables = selectRandomFood(vegetables, 1);
+    const selectedGrain = foodLibraryService.getRandomSelection(grains.filter(g => g.gunas?.includes('Light')), 1)[0];
+    const selectedProtein = foodLibraryService.getRandomSelection(proteins, 1)[0];
+    const selectedVegetables = foodLibraryService.getRandomSelection(vegetables, 1);
     
     return {
       main: `Light ${selectedGrain?.name || 'grain'} preparation`,
       protein: `${selectedProtein?.name || 'Dal'} soup`,
       vegetables: selectedVegetables[0]?.name + ' (steamed)' || 'Steamed vegetables',
-      spices: getRecommendedSpices(primaryDosha, 'evening').slice(0, 2),
+      spices: foodLibraryService.getRecommendedSpices(primaryDosha).slice(0, 2),
       preparation: "Keep dinner light and easily digestible. Finish 3 hours before bedtime.",
       ayurvedicNote: "Light evening meal promotes good sleep and proper digestion."
     };

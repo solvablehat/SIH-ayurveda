@@ -18,7 +18,11 @@ import Appointments from "./pages/Appointments";
 import NewAppointment from "./pages/NewAppointment";
 import NotFound from "./pages/NotFound";
 // New Core 6 Screens
-import DoshaAssessment from "./pages/DoshaAssessment";
+import DoshaAssessment from './pages/DoshaAssessment';
+import FoodLibrary from './pages/FoodLibrary';
+import AyurBotPage from './pages/AyurBotPage';
+
+// ...existing imports...
 import DietPlanGeneratorNew from "./pages/DietPlanGeneratorNew";
 import GeneratedDietChart from "./pages/GeneratedDietChart";
 
@@ -63,6 +67,8 @@ const App = () => (
                     <Route path="/diet-plan/generator" element={<DietPlanGeneratorNew />} />
                     <Route path="/diet-chart/:patientId/generated" element={<GeneratedDietChart />} />
                     <Route path="/patients/:id/dosha-assessment" element={<DoshaAssessment />} />
+                    <Route path="/food-library" element={<FoodLibrary />} />
+                    <Route path="/ayurbot" element={<AyurBotPage />} />
                     
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />

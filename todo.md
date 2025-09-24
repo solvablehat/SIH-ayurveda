@@ -25,10 +25,10 @@
 **Priority**: Features that make reviewers go "This is actually useful!"
 
 #### Must-Have Demo Features:
-1. **Dosha Assessment Quiz** (5-6 questions → instant results)
-2. **Smart Diet Recommendations** (show traditional knowledge digitized)
-3. **Calendar Compliance View** (visual progress tracking)
-4. **PDF Diet Chart Export** (something tangible they can touch)
+1. ✅ **Dosha Assessment Quiz** (5-6 questions → instant results)
+2. ✅ **Smart Diet Recommendations** (show traditional knowledge digitized)
+3. ✅ **Calendar Compliance View** (visual progress tracking)
+4. ⏳ **PDF Diet Chart Export** (print-to-PDF available; programmatic export pending)
 
 ---
 
@@ -227,11 +227,11 @@ Live demo: Patient assessment → Instant diet plan → Compliance tracking
 ## 🎪 FINAL CHECKLIST
 
 ### **Technical**
-- [ ] All 6 core screens working
-- [ ] Mobile responsive
+- [x] All 6 core screens working
+- [x] Mobile responsive
 - [ ] Fast loading (< 3 seconds)
 - [ ] No console errors
-- [ ] PDF export works
+- [ ] PDF export works (print-to-PDF works; programmatic export pending)
 
 ### **Business**
 - [ ] Demo script memorized

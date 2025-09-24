@@ -1,4 +1,5 @@
 export const doshaAssessmentQuestions = [
+  // --- Physical Characteristics ---
   {
     id: 1,
     text: "How would you describe your physical build?",
@@ -22,94 +23,6 @@ export const doshaAssessmentQuestions = [
     ]
   },
   {
-    id: 2,
-    text: "How is your appetite and digestion?",
-    category: "digestion",
-    options: [
-      { 
-        value: "vata", 
-        text: "Irregular appetite, gas and bloating",
-        description: "Sometimes very hungry, sometimes no appetite"
-      },
-      { 
-        value: "pitta", 
-        text: "Strong appetite, good digestion",
-        description: "Get irritable when hungry, can eat large quantities"
-      },
-      { 
-        value: "kapha", 
-        text: "Steady appetite, slow digestion",
-        description: "Can skip meals easily, feel heavy after eating"
-      }
-    ]
-  },
-  {
-    id: 3,
-    text: "What is your sleep pattern like?",
-    category: "sleep",
-    options: [
-      { 
-        value: "vata", 
-        text: "Light sleeper, difficulty falling asleep",
-        description: "5-7 hours sleep, wake up frequently during night"
-      },
-      { 
-        value: "pitta", 
-        text: "Moderate sleeper, fall asleep easily",
-        description: "6-8 hours sleep, occasional vivid dreams"
-      },
-      { 
-        value: "kapha", 
-        text: "Deep sleeper, need 8+ hours",
-        description: "Heavy sleep, difficulty waking up in morning"
-      }
-    ]
-  },
-  {
-    id: 4,
-    text: "How do you handle stress and emotions?",
-    category: "mental",
-    options: [
-      { 
-        value: "vata", 
-        text: "Get anxious and worried quickly",
-        description: "Mind races, difficulty concentrating under stress"
-      },
-      { 
-        value: "pitta", 
-        text: "Become angry or irritated",
-        description: "Critical thinking, can be judgmental when stressed"
-      },
-      { 
-        value: "kapha", 
-        text: "Remain calm and steady",
-        description: "Withdraw or become lethargic when overwhelmed"
-      }
-    ]
-  },
-  {
-    id: 5,
-    text: "What is your energy level throughout the day?",
-    category: "energy",
-    options: [
-      { 
-        value: "vata", 
-        text: "High bursts followed by fatigue",
-        description: "Very active in spurts, then need to rest"
-      },
-      { 
-        value: "pitta", 
-        text: "Consistent, moderate to high energy",
-        description: "Steady energy, peak performance in afternoon"
-      },
-      { 
-        value: "kapha", 
-        text: "Steady, slow to start but good endurance",
-        description: "Lower energy mornings, steady throughout day"
-      }
-    ]
-  },
-  {
     id: 6,
     text: "How is your skin and hair?",
     category: "physical",
@@ -128,6 +41,141 @@ export const doshaAssessmentQuestions = [
         value: "kapha", 
         text: "Smooth, oily skin, thick hair",
         description: "Soft, moist skin, lustrous thick hair"
+      }
+    ]
+  },
+  {
+    id: 7, // New Question
+    text: "How do you typically react to weather?",
+    category: "physical",
+    options: [
+      { 
+        value: "vata", 
+        text: "I dislike cold and wind intensely",
+        description: "I prefer warm, humid climates and layer up in the cold"
+      },
+      { 
+        value: "pitta", 
+        text: "I can't stand extreme heat or sun",
+        description: "I prefer cooler environments and can get overheated easily"
+      },
+      { 
+        value: "kapha", 
+        text: "I dislike cold, damp, and cloudy weather",
+        description: "I feel sluggish in damp weather and energized by warmth"
+      }
+    ]
+  },
+  // --- Digestion & Appetite ---
+  {
+    id: 2,
+    text: "How is your appetite and digestion?",
+    category: "digestion",
+    options: [
+      { 
+        value: "vata", 
+        text: "Irregular appetite, gas and bloating",
+        description: "Sometimes very hungry, sometimes I forget to eat"
+      },
+      { 
+        value: "pitta", 
+        text: "Strong appetite, good digestion",
+        description: "I get irritable or 'hangry' if I miss a meal"
+      },
+      { 
+        value: "kapha", 
+        text: "Steady appetite, slow digestion",
+        description: "I can skip meals easily and feel heavy after eating"
+      }
+    ]
+  },
+  // --- Mental & Emotional State ---
+  {
+    id: 4,
+    text: "How do you handle stress and emotions?",
+    category: "mental",
+    options: [
+      { 
+        value: "vata", 
+        text: "I get anxious and worried quickly",
+        description: "My mind races, and I find it hard to concentrate under stress"
+      },
+      { 
+        value: "pitta", 
+        text: "I become angry, critical, or irritated",
+        description: "I can be sharp-tongued or judgmental when stressed"
+      },
+      { 
+        value: "kapha", 
+        text: "I remain calm but may withdraw or shut down",
+        description: "I become lethargic and unmotivated when overwhelmed"
+      }
+    ]
+  },
+  {
+    id: 8, // New Question
+    text: "What is your memory and learning style like?",
+    category: "mental",
+    options: [
+      { 
+        value: "vata", 
+        text: "I learn very quickly, but also forget quickly",
+        description: "Great short-term memory, but struggle with long-term recall"
+      },
+      { 
+        value: "pitta", 
+        text: "My mind is sharp and I learn systematically",
+        description: "I have a focused, penetrating intellect and good memory"
+      },
+      { 
+        value: "kapha", 
+        text: "I learn slowly and methodically, but never forget",
+        description: "Excellent long-term memory once a concept is understood"
+      }
+    ]
+  },
+  // --- Energy & Sleep ---
+  {
+    id: 5,
+    text: "What is your energy level throughout the day?",
+    category: "energy",
+    options: [
+      { 
+        value: "vata", 
+        text: "High bursts followed by fatigue",
+        description: "My energy comes in spurts; I'm not a marathon runner"
+      },
+      { 
+        value: "pitta", 
+        text: "Consistent, moderate to high energy",
+        description: "I have strong, focused energy, especially in the afternoon"
+      },
+      { 
+        value: "kapha", 
+        text: "Steady, slow to start but good endurance",
+        description: "Lower energy in the mornings, but steady throughout the day"
+      }
+    ]
+  },
+  {
+    id: 3,
+    text: "What is your sleep pattern like?",
+    category: "sleep",
+    options: [
+      { 
+        value: "vata", 
+        text: "Light sleeper, difficulty falling asleep",
+        description: "I often have interrupted sleep and an active mind at night"
+      },
+      { 
+        value: "pitta", 
+        text: "Moderate sleeper, fall asleep easily",
+        description: "I sleep soundly but can wake up feeling hot or with intense dreams"
+      },
+      { 
+        value: "kapha", 
+        text: "Deep, heavy sleeper, need 8+ hours",
+        description: "I love to sleep and have a very hard time waking up"
       }
     ]
   }

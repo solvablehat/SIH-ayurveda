@@ -9,7 +9,7 @@ export interface Appointment {
   notes?: string;
 }
 
-const STORAGE_KEY = 'ayurcare:appointments';
+const STORAGE_KEY = 'Vitarva:appointments';
 
 function readAll(): Appointment[] {
   try {

@@ -1,0 +1,58 @@
+Suggested backend APIs (to replace each mock)
+Auth
+
+POST /auth/login — body: { email, password } → sets session/returns token
+GET /auth/me — returns current user
+Patients
+
+GET /patients — list with query params: page, search, dosha
+GET /patients/:id — full profile
+POST /patients — create patient
+PATCH /patients/:id — update patient
+GET /patients/:id/notes — clinical notes
+POST /patients/:id/notes — add note
+GET /patients/:id/metrics — compliance, last/next visits
+Appointments
+
+GET /appointments?date=YYYY-MM-DD — for Dashboard “today’s appointments”
+GET /patients/:id/appointments — history for patient
+POST /appointments — create appointment
+PATCH /appointments/:id — reschedule/cancel/status
+Dashboard
+
+GET /dashboard/stats — { todaysAppointments, totalPatients, complianceRate, newPatientsThisMonth }
+Assessments (Dosha)
+
+GET /assessments/questions — replaces doshaAssessmentQuestions
+POST /patients/:id/assessments — save assessment result
+GET /patients/:id/assessments — list results over time
+GET /dosha/descriptions — replaces doshaDescriptions
+GET /dosha/principles — replaces ayurvedicPrinciples
+Food catalog
+
+GET /foods?page=1&limit=50&category=grains|proteins|… — replaces foodDatabase
+GET /foods/:id — details
+POST /foods — admin-only create
+PATCH /foods/:id — admin-only update
+Diet plans
+
+POST /diet/generate — body: { patientId, preferences } → returns generated plan (move logic server-side)
+POST /patients/:id/diet-plans — save a plan
+GET /patients/:id/diet-plans — list saved plans
+GET /diet-plans/:planId — fetch a plan
+POST /diet-plans/:planId/export — create PDF; returns file ref/signed URL
+GET /diet-plans/:planId/pdf — download/view PDF
+Files/Storage (cloud)
+
+POST /upload — get pre-signed URL for avatars/PDFs
+PUT <signed-url> — upload file directly to object storage
+GET /files/:id — resolve signed URL
+Minimal data shapes (quick guidance)
+Patient
+id, name, age, gender, phone, email, address, photoUrl, dosha { vata, pitta, kapha }, conditions[], medications[], lastVisit, nextAppointment, compliance, notes
+Food
+id, name, category, rasa[], virya, vipaka, gunas[], doshaEffects { vata, pitta, kapha }, nutritionalValues { calories, protein, carbs, fat, fiber }, benefits, contraindications[], preparationTips
+Appointment
+id, patientId, time, type, duration, status
+DietPlan
+id, patientId, morning/afternoon/evening { main, protein, vegetables, spices[], preparation, ayurvedicNote }, nutritionalSummary, ayurvedicPrinciples[], doshaAnalysis, createdAt

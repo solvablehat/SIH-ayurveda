@@ -234,21 +234,49 @@ export default function DoshaAssessment() {
   const patient = patientId ? demoPatients.find(p => p.id === parseInt(patientId)) : null;
 
   const calculateDosha = () => {
-    const scores = { vata: 0, pitta: 0, kapha: 0 };
-    
-    Object.values(answers).forEach(answer => {
-      scores[answer as keyof typeof scores]++;
+    // Robust scoring: count answers (case-insensitive), ignore unanswered questions
+    const counts: { vata: number; pitta: number; kapha: number } = { vata: 0, pitta: 0, kapha: 0 };
+
+    // Use the canonical question list to iterate (ensures consistent indexing)
+    doshaAssessmentQuestions.forEach((_, idx) => {
+      const raw = answers[idx];
+      if (!raw) return;
+      const key = String(raw).toLowerCase();
+      if (key === "vata" || key === "pitta" || key === "kapha") {
+        counts[key as keyof typeof counts]++;
+      }
     });
-    
-    const total = Object.values(scores).reduce((a, b) => a + b, 0);
-    
-    if (total === 0) return { vata: 33, pitta: 33, kapha: 34 };
-    
-    return {
-      vata: Math.round((scores.vata / total) * 100),
-      pitta: Math.round((scores.pitta / total) * 100),
-      kapha: Math.round((scores.kapha / total) * 100)
+
+    const total = counts.vata + counts.pitta + counts.kapha;
+    if (total === 0) {
+      // No answers -> balanced default
+      return { vata: 33, pitta: 33, kapha: 34 };
+    }
+
+    // Convert to percentages and round while ensuring sum === 100
+    const rawPct = {
+      vata: (counts.vata / total) * 100,
+      pitta: (counts.pitta / total) * 100,
+      kapha: (counts.kapha / total) * 100,
     };
+
+    let v = Math.round(rawPct.vata);
+    let p = Math.round(rawPct.pitta);
+    let k = Math.round(rawPct.kapha);
+    let sum = v + p + k;
+
+    if (sum !== 100) {
+      // Adjust the largest bucket by the difference to guarantee total 100
+      const diff = 100 - sum;
+      const maxKey = Object.keys(rawPct).reduce((a, b) =>
+        rawPct[a as keyof typeof rawPct] > rawPct[b as keyof typeof rawPct] ? a : b
+      );
+      if (maxKey === "vata") v += diff;
+      else if (maxKey === "pitta") p += diff;
+      else k += diff;
+    }
+
+    return { vata: v, pitta: p, kapha: k };
   };
 
   const handleAnswer = (value: string) => {

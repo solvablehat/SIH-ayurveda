@@ -56,12 +56,6 @@ export function WebsiteLayout({ children }: WebsiteLayoutProps) {
       current: location.pathname.startsWith("/assessment")
     },
     { 
-      name: "Diet Generator", 
-      href: "/diet-plan/generator", 
-      icon: Utensils,
-      current: location.pathname.startsWith("/diet-plan")
-    },
-    { 
       name: "Compliance", 
       href: "/compliance", 
       icon: ChartBar,
@@ -101,7 +95,7 @@ export function WebsiteLayout({ children }: WebsiteLayoutProps) {
               </div>
               <div>
                 <h2 className="font-playfair font-bold text-lg text-foreground">
-                  AyurCare
+                  Vitarva
                 </h2>
                 <p className="text-xs text-muted-foreground">Practice Management</p>
               </div>

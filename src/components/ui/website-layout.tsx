@@ -1,5 +1,5 @@
 import { ReactNode, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { 
@@ -13,7 +13,10 @@ import {
   Moon,
   Sun,
   Bell,
-  Settings
+  Settings,
+  LogOut,
+  Activity,
+  Utensils
 } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
 
@@ -24,7 +27,14 @@ interface WebsiteLayoutProps {
 export function WebsiteLayout({ children }: WebsiteLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+
+  const handleLogout = () => {
+    localStorage.removeItem('ayur-token');
+    localStorage.removeItem('ayur-user');
+    navigate('/login');
+  };
 
   const navigation = [
     { 
@@ -38,6 +48,18 @@ export function WebsiteLayout({ children }: WebsiteLayoutProps) {
       href: "/patients", 
       icon: Users,
       current: location.pathname === "/patients" || location.pathname.startsWith("/patients/")
+    },
+    { 
+      name: "Dosha Assessment", 
+      href: "/assessment", 
+      icon: Activity,
+      current: location.pathname.startsWith("/assessment")
+    },
+    { 
+      name: "Diet Generator", 
+      href: "/diet-plan/generator", 
+      icon: Utensils,
+      current: location.pathname.startsWith("/diet-plan")
     },
     { 
       name: "Compliance", 
@@ -173,6 +195,9 @@ export function WebsiteLayout({ children }: WebsiteLayoutProps) {
               </Button>
               <Button variant="ghost" size="sm">
                 <Settings className="h-5 w-5" />
+              </Button>
+              <Button variant="ghost" size="sm" onClick={handleLogout}>
+                <LogOut className="h-5 w-5" />
               </Button>
             </div>
           </div>

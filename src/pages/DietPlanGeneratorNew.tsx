@@ -242,19 +242,31 @@ function GeneratedPlanDisplay({ plan, patient }: { plan: any; patient: any }) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {plan.morning.meals.map((meal: any, index: number) => (
-              <div key={index} className="p-3 bg-orange-50 rounded-lg">
-                <h4 className="font-medium text-orange-800 mb-2">{meal.name}</h4>
-                <div className="space-y-1">
-                  {meal.items.map((item: string, i: number) => (
-                    <p key={i} className="text-sm text-orange-700">• {item}</p>
-                  ))}
+            <div className="p-4 bg-orange-50 rounded-lg border-l-4 border-orange-400">
+              <h4 className="font-semibold text-orange-800 mb-3">Morning Meal Plan</h4>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-orange-700">Main:</span>
+                  <span className="text-sm text-orange-800">{plan.morning.main}</span>
                 </div>
-                {meal.preparation && (
-                  <p className="text-xs text-orange-600 mt-2 italic">{meal.preparation}</p>
-                )}
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-orange-700">Protein:</span>
+                  <span className="text-sm text-orange-800">{plan.morning.protein}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-orange-700">Vegetables:</span>
+                  <span className="text-sm text-orange-800">{plan.morning.vegetables}</span>
+                </div>
+                <div className="flex justify-between items-start">
+                  <span className="text-sm font-medium text-orange-700">Spices:</span>
+                  <span className="text-sm text-orange-800">{plan.morning.spices.join(', ')}</span>
+                </div>
               </div>
-            ))}
+              <div className="mt-3 pt-3 border-t border-orange-200">
+                <p className="text-xs text-orange-700 italic">{plan.morning.preparation}</p>
+                <p className="text-xs text-orange-600 mt-1">💡 {plan.morning.ayurvedicNote}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -267,19 +279,31 @@ function GeneratedPlanDisplay({ plan, patient }: { plan: any; patient: any }) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {plan.afternoon.meals.map((meal: any, index: number) => (
-              <div key={index} className="p-3 bg-blue-50 rounded-lg">
-                <h4 className="font-medium text-blue-800 mb-2">{meal.name}</h4>
-                <div className="space-y-1">
-                  {meal.items.map((item: string, i: number) => (
-                    <p key={i} className="text-sm text-blue-700">• {item}</p>
-                  ))}
+            <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+              <h4 className="font-semibold text-blue-800 mb-3">Afternoon Meal Plan</h4>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-blue-700">Main:</span>
+                  <span className="text-sm text-blue-800">{plan.afternoon.main}</span>
                 </div>
-                {meal.preparation && (
-                  <p className="text-xs text-blue-600 mt-2 italic">{meal.preparation}</p>
-                )}
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-blue-700">Protein:</span>
+                  <span className="text-sm text-blue-800">{plan.afternoon.protein}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-blue-700">Vegetables:</span>
+                  <span className="text-sm text-blue-800">{plan.afternoon.vegetables}</span>
+                </div>
+                <div className="flex justify-between items-start">
+                  <span className="text-sm font-medium text-blue-700">Spices:</span>
+                  <span className="text-sm text-blue-800">{plan.afternoon.spices.join(', ')}</span>
+                </div>
               </div>
-            ))}
+              <div className="mt-3 pt-3 border-t border-blue-200">
+                <p className="text-xs text-blue-700 italic">{plan.afternoon.preparation}</p>
+                <p className="text-xs text-blue-600 mt-1">💡 {plan.afternoon.ayurvedicNote}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -292,42 +316,101 @@ function GeneratedPlanDisplay({ plan, patient }: { plan: any; patient: any }) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {plan.evening.meals.map((meal: any, index: number) => (
-              <div key={index} className="p-3 bg-purple-50 rounded-lg">
-                <h4 className="font-medium text-purple-800 mb-2">{meal.name}</h4>
-                <div className="space-y-1">
-                  {meal.items.map((item: string, i: number) => (
-                    <p key={i} className="text-sm text-purple-700">• {item}</p>
-                  ))}
+            <div className="p-4 bg-purple-50 rounded-lg border-l-4 border-purple-400">
+              <h4 className="font-semibold text-purple-800 mb-3">Evening Meal Plan</h4>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-purple-700">Main:</span>
+                  <span className="text-sm text-purple-800">{plan.evening.main}</span>
                 </div>
-                {meal.preparation && (
-                  <p className="text-xs text-purple-600 mt-2 italic">{meal.preparation}</p>
-                )}
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-purple-700">Protein:</span>
+                  <span className="text-sm text-purple-800">{plan.evening.protein}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-purple-700">Vegetables:</span>
+                  <span className="text-sm text-purple-800">{plan.evening.vegetables}</span>
+                </div>
+                <div className="flex justify-between items-start">
+                  <span className="text-sm font-medium text-purple-700">Spices:</span>
+                  <span className="text-sm text-purple-800">{plan.evening.spices.join(', ')}</span>
+                </div>
               </div>
-            ))}
+              <div className="mt-3 pt-3 border-t border-purple-200">
+                <p className="text-xs text-purple-700 italic">{plan.evening.preparation}</p>
+                <p className="text-xs text-purple-600 mt-1">💡 {plan.evening.ayurvedicNote}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Ayurvedic Principles */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Leaf className="h-5 w-5 text-green-500" />
-            <span>Ayurvedic Guidelines</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {plan.ayurvedicGuidelines.map((guideline: string, index: number) => (
-              <p key={index} className="text-sm flex items-start space-x-2">
-                <span className="text-green-500 mt-1">•</span>
-                <span>{guideline}</span>
+      {/* Nutritional Summary & Ayurvedic Principles */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Nutritional Summary */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <ChefHat className="h-5 w-5 text-blue-500" />
+              <span>Nutritional Summary</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Daily Calories:</span>
+                <span className="text-sm text-blue-600 font-semibold">{plan.nutritionalSummary.calories}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Protein:</span>
+                <span className="text-sm text-blue-600 font-semibold">{plan.nutritionalSummary.protein}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Carbohydrates:</span>
+                <span className="text-sm text-blue-600 font-semibold">{plan.nutritionalSummary.carbs}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Healthy Fats:</span>
+                <span className="text-sm text-blue-600 font-semibold">{plan.nutritionalSummary.fat}</span>
+              </div>
+            </div>
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+              <p className="text-xs text-blue-700">
+                <strong>Dosha Analysis:</strong> {plan.doshaAnalysis.constitution}
               </p>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              <p className="text-xs text-blue-600 mt-1">
+                Primary: <strong>{plan.doshaAnalysis.primary.toUpperCase()}</strong> constitution
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Ayurvedic Principles */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Leaf className="h-5 w-5 text-green-500" />
+              <span>Ayurvedic Guidelines</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {plan.ayurvedicPrinciples.map((guideline: string, index: number) => (
+                <p key={index} className="text-sm flex items-start space-x-2">
+                  <span className="text-green-500 mt-1">•</span>
+                  <span>{guideline}</span>
+                </p>
+              ))}
+            </div>
+            <div className="mt-4 p-3 bg-green-50 rounded-lg">
+              <h4 className="text-sm font-semibold text-green-800 mb-2">Key Recommendations:</h4>
+              {plan.doshaAnalysis.recommendations.map((rec: string, index: number) => (
+                <p key={index} className="text-xs text-green-700">• {rec}</p>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Action Buttons */}
       <div className="flex space-x-4">
@@ -382,72 +465,102 @@ export default function DietPlanGenerator() {
     return 'kapha';
   };
 
-  const generateMeals = (timeOfDay: string, dosha: any) => {
+  // Smart meal generation based on dosha compatibility
+  const generateMeals = (timeOfDay: string, dosha: any, preferences: any) => {
     const primaryDosha = getPrimaryDosha(dosha);
     
-    // Filter foods suitable for the dosha
+    // Filter foods based on dosha compatibility (70% threshold as per spec)
     const suitableFoods = foodDatabase.filter(food => 
       food.doshaEffects[primaryDosha as keyof typeof food.doshaEffects] >= 0.7
     );
 
-    const grains = suitableFoods.filter(f => f.category === 'grains');
-    const proteins = suitableFoods.filter(f => f.category === 'proteins');
-    const vegetables = suitableFoods.filter(f => f.category === 'vegetables');
-    const spices = suitableFoods.filter(f => f.category === 'spices');
+    // Further filter based on dietary preferences
+    let filteredFoods = suitableFoods;
+    if (preferences.allergies?.includes('Dairy')) {
+      filteredFoods = filteredFoods.filter(f => f.category !== 'dairy');
+    }
+    if (preferences.allergies?.includes('Nuts')) {
+      filteredFoods = filteredFoods.filter(f => f.category !== 'nuts');
+    }
+    if (preferences.allergies?.includes('Gluten')) {
+      filteredFoods = filteredFoods.filter(f => f.name !== 'Wheat');
+    }
+
+    const grains = filteredFoods.filter(f => f.category === 'grains');
+    const proteins = filteredFoods.filter(f => f.category === 'proteins');
+    const vegetables = filteredFoods.filter(f => f.category === 'vegetables');
+    const spices = filteredFoods.filter(f => f.category === 'spices');
+    const fruits = filteredFoods.filter(f => f.category === 'fruits');
+
+    // Select random suitable foods for variety
+    const selectRandomFood = (foods: any[], count = 1) => {
+      if (foods.length === 0) return [];
+      const shuffled = [...foods].sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, count);
+    };
+
+    const getRecommendedSpices = (dosha: string, time: string) => {
+      const doshaSpices = {
+        vata: ['Ginger', 'Cinnamon', 'Cardamom', 'Cumin'],
+        pitta: ['Coriander', 'Fennel', 'Mint', 'Cumin'],
+        kapha: ['Black Pepper', 'Ginger', 'Turmeric', 'Mustard Seeds']
+      };
+      return doshaSpices[dosha as keyof typeof doshaSpices] || [];
+    };
 
     if (timeOfDay === 'morning') {
+      const selectedGrain = selectRandomFood(grains)[0];
+      const selectedSpices = getRecommendedSpices(primaryDosha, 'morning');
+      
       return {
-        meals: [
-          {
-            name: "Early Morning",
-            items: ["Warm water with lemon and ginger", "1 tsp honey (optional)"],
-            preparation: "Drink on empty stomach to kindle digestive fire"
-          },
-          {
-            name: "Breakfast",
-            items: [
-              grains[0]?.name + " porridge" || "Oats porridge",
-              "Soaked almonds (5-6)",
-              vegetables[0]?.name + " cooked" || "Cooked vegetables",
-              spices[0]?.name + " powder" || "Warming spices"
-            ],
-            preparation: "Cook with ghee and warming spices for better digestion"
-          }
-        ]
+        main: selectedGrain?.name || "Oats",
+        protein: "Soaked almonds (5-6)",
+        vegetables: selectRandomFood(vegetables, 1)[0]?.name || "Seasonal vegetables",
+        spices: selectedSpices.slice(0, 2),
+        preparation: `Cook ${selectedGrain?.name || 'oats'} with ${selectedSpices.join(', ')} and ghee. ${selectedGrain?.preparationTips || 'Serve warm'}.`,
+        ayurvedicNote: `${selectedGrain?.ayurvedicBenefits || 'Provides sustained energy'} - Perfect for ${primaryDosha} constitution.`
       };
     }
 
     if (timeOfDay === 'afternoon') {
+      const selectedGrain = selectRandomFood(grains.filter(g => g.name !== 'Oats'))[0];
+      const selectedProtein = selectRandomFood(proteins)[0];
+      const selectedVegetables = selectRandomFood(vegetables, 2);
+      
       return {
-        meals: [
-          {
-            name: "Lunch (Main Meal)",
-            items: [
-              grains[1]?.name || "Rice",
-              proteins[0]?.name || "Dal",
-              vegetables[1]?.name + " sabzi" || "Seasonal vegetables",
-              "Fresh buttermilk with cumin",
-              "Small portion of pickle or chutney"
-            ],
-            preparation: "Eat largest meal at midday when digestive fire is strongest"
-          }
-        ]
+        main: selectedGrain?.name || "Basmati Rice",
+        protein: selectedProtein?.name || "Mung Dal", 
+        vegetables: selectedVegetables.map(v => v.name).join(' and ') || "Seasonal vegetables",
+        spices: getRecommendedSpices(primaryDosha, 'afternoon').slice(0, 3),
+        preparation: `${selectedProtein?.preparationTips || 'Cook well with spices'}. ${selectedGrain?.preparationTips || 'Serve with ghee'}.`,
+        ayurvedicNote: `${selectedProtein?.ayurvedicBenefits || 'Provides essential proteins'} Main meal should be largest of the day.`
       };
     }
 
+    // Evening
+    const selectedGrain = selectRandomFood(grains.filter(g => g.gunas?.includes('Light')))[0];
+    const selectedProtein = selectRandomFood(proteins.filter(p => p.category === 'proteins'))[0];
+    const selectedVegetables = selectRandomFood(vegetables, 1);
+    
     return {
-      meals: [
-        {
-          name: "Evening Meal",
-          items: [
-            "Light " + (grains[0]?.name || "grain") + " preparation",
-            proteins[0]?.name + " soup" || "Light dal soup",
-            vegetables[2]?.name + " cooked" || "Steamed vegetables",
-            "Herbal tea with digestive spices"
-          ],
-          preparation: "Keep dinner light and finish 3 hours before bedtime"
-        }
-      ]
+      main: `Light ${selectedGrain?.name || 'grain'} preparation`,
+      protein: `${selectedProtein?.name || 'Dal'} soup`,
+      vegetables: selectedVegetables[0]?.name + ' (steamed)' || 'Steamed vegetables',
+      spices: getRecommendedSpices(primaryDosha, 'evening').slice(0, 2),
+      preparation: "Keep dinner light and easily digestible. Finish 3 hours before bedtime.",
+      ayurvedicNote: "Light evening meal promotes good sleep and proper digestion."
+    };
+  };
+
+  const calculateNutrition = (dosha: any) => {
+    const primaryDosha = getPrimaryDosha(dosha);
+    const baseCalories = primaryDosha === 'vata' ? 2000 : primaryDosha === 'pitta' ? 2200 : 1800;
+    
+    return {
+      calories: `${baseCalories - 200} - ${baseCalories + 200} per day`,
+      protein: `${Math.round(baseCalories * 0.15 / 4)} - ${Math.round(baseCalories * 0.20 / 4)}g per day`,
+      carbs: `${Math.round(baseCalories * 0.45 / 4)} - ${Math.round(baseCalories * 0.65 / 4)}g per day`,
+      fat: `${Math.round(baseCalories * 0.20 / 9)} - ${Math.round(baseCalories * 0.35 / 9)}g per day`
     };
   };
 
@@ -456,21 +569,21 @@ export default function DietPlanGenerator() {
 
     setIsGenerating(true);
     
-    // Simulate AI processing time
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    // Simulate AI processing time (2 seconds as per spec)
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     const primaryDosha = getPrimaryDosha(selectedPatient.dosha);
     
     const plan = {
-      morning: generateMeals('morning', selectedPatient.dosha),
-      afternoon: generateMeals('afternoon', selectedPatient.dosha),
-      evening: generateMeals('evening', selectedPatient.dosha),
-      ayurvedicGuidelines: ayurvedicPrinciples[primaryDosha as keyof typeof ayurvedicPrinciples],
-      nutritionalSummary: {
-        calories: "1800-2200 per day",
-        protein: "60-80g per day", 
-        carbs: "250-300g per day",
-        fat: "60-80g per day"
+      morning: generateMeals('morning', selectedPatient.dosha, preferences),
+      afternoon: generateMeals('afternoon', selectedPatient.dosha, preferences),
+      evening: generateMeals('evening', selectedPatient.dosha, preferences),
+      ayurvedicPrinciples: ayurvedicPrinciples[primaryDosha as keyof typeof ayurvedicPrinciples],
+      nutritionalSummary: calculateNutrition(selectedPatient.dosha),
+      doshaAnalysis: {
+        primary: primaryDosha,
+        constitution: `${selectedPatient.dosha.vata}% Vata, ${selectedPatient.dosha.pitta}% Pitta, ${selectedPatient.dosha.kapha}% Kapha`,
+        recommendations: ayurvedicPrinciples[primaryDosha as keyof typeof ayurvedicPrinciples].slice(0, 3)
       }
     };
 

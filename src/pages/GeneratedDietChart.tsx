@@ -214,33 +214,41 @@ export default function GeneratedDietChart() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                <div className="space-y-4">
-                  {plan.morning.meals.map((meal: any, index: number) => (
-                    <div key={index} className="border-l-4 border-orange-200 pl-4">
-                      <h4 className="font-semibold text-orange-800 mb-2">{meal.name}</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <h5 className="font-medium text-sm mb-1">Items:</h5>
-                          <ul className="text-sm space-y-1">
-                            {meal.items.map((item: string, i: number) => (
-                              <li key={i} className="flex items-start space-x-2">
-                                <span className="text-orange-500">•</span>
-                                <span>{item}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        {meal.preparation && (
-                          <div>
-                            <h5 className="font-medium text-sm mb-1">Preparation:</h5>
-                            <p className="text-sm text-muted-foreground italic">
-                              {meal.preparation}
-                            </p>
-                          </div>
-                        )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h4 className="font-semibold text-orange-800 mb-3">Meal Components</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium text-sm">Main Grain:</span>
+                        <span className="text-orange-700 font-medium">{plan.morning.main}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium text-sm">Protein:</span>
+                        <span className="text-orange-700 font-medium">{plan.morning.protein}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium text-sm">Vegetables:</span>
+                        <span className="text-orange-700 font-medium">{plan.morning.vegetables}</span>
+                      </div>
+                      <div className="flex justify-between items-start">
+                        <span className="font-medium text-sm">Recommended Spices:</span>
+                        <span className="text-orange-700 font-medium text-right">{plan.morning.spices.join(', ')}</span>
                       </div>
                     </div>
-                  ))}
+                  </div>
+                  <div className="space-y-4">
+                    <h4 className="font-semibold text-orange-800 mb-3">Preparation & Benefits</h4>
+                    <div className="space-y-3">
+                      <div>
+                        <h5 className="font-medium text-sm text-orange-700 mb-1">Preparation Method:</h5>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{plan.morning.preparation}</p>
+                      </div>
+                      <div>
+                        <h5 className="font-medium text-sm text-orange-700 mb-1">Ayurvedic Benefits:</h5>
+                        <p className="text-sm text-green-600 leading-relaxed">💡 {plan.morning.ayurvedicNote}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -254,33 +262,46 @@ export default function GeneratedDietChart() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                <div className="space-y-4">
-                  {plan.afternoon.meals.map((meal: any, index: number) => (
-                    <div key={index} className="border-l-4 border-blue-200 pl-4">
-                      <h4 className="font-semibold text-blue-800 mb-2">{meal.name}</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <h5 className="font-medium text-sm mb-1">Items:</h5>
-                          <ul className="text-sm space-y-1">
-                            {meal.items.map((item: string, i: number) => (
-                              <li key={i} className="flex items-start space-x-2">
-                                <span className="text-blue-500">•</span>
-                                <span>{item}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        {meal.preparation && (
-                          <div>
-                            <h5 className="font-medium text-sm mb-1">Preparation:</h5>
-                            <p className="text-sm text-muted-foreground italic">
-                              {meal.preparation}
-                            </p>
-                          </div>
-                        )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h4 className="font-semibold text-blue-800 mb-3">Main Meal Components</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium text-sm">Main Grain:</span>
+                        <span className="text-blue-700 font-medium">{plan.afternoon.main}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium text-sm">Protein:</span>
+                        <span className="text-blue-700 font-medium">{plan.afternoon.protein}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium text-sm">Vegetables:</span>
+                        <span className="text-blue-700 font-medium">{plan.afternoon.vegetables}</span>
+                      </div>
+                      <div className="flex justify-between items-start">
+                        <span className="font-medium text-sm">Digestive Spices:</span>
+                        <span className="text-blue-700 font-medium text-right">{plan.afternoon.spices.join(', ')}</span>
                       </div>
                     </div>
-                  ))}
+                    <div className="mt-4 p-3 bg-blue-50 rounded">
+                      <p className="text-xs text-blue-700">
+                        <strong>Note:</strong> This should be your largest meal of the day when digestive fire is strongest.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <h4 className="font-semibold text-blue-800 mb-3">Preparation & Benefits</h4>
+                    <div className="space-y-3">
+                      <div>
+                        <h5 className="font-medium text-sm text-blue-700 mb-1">Cooking Instructions:</h5>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{plan.afternoon.preparation}</p>
+                      </div>
+                      <div>
+                        <h5 className="font-medium text-sm text-blue-700 mb-1">Ayurvedic Benefits:</h5>
+                        <p className="text-sm text-green-600 leading-relaxed">💡 {plan.afternoon.ayurvedicNote}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -294,88 +315,171 @@ export default function GeneratedDietChart() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                <div className="space-y-4">
-                  {plan.evening.meals.map((meal: any, index: number) => (
-                    <div key={index} className="border-l-4 border-purple-200 pl-4">
-                      <h4 className="font-semibold text-purple-800 mb-2">{meal.name}</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <h5 className="font-medium text-sm mb-1">Items:</h5>
-                          <ul className="text-sm space-y-1">
-                            {meal.items.map((item: string, i: number) => (
-                              <li key={i} className="flex items-start space-x-2">
-                                <span className="text-purple-500">•</span>
-                                <span>{item}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        {meal.preparation && (
-                          <div>
-                            <h5 className="font-medium text-sm mb-1">Preparation:</h5>
-                            <p className="text-sm text-muted-foreground italic">
-                              {meal.preparation}
-                            </p>
-                          </div>
-                        )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h4 className="font-semibold text-purple-800 mb-3">Light Evening Meal</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium text-sm">Main Grain:</span>
+                        <span className="text-purple-700 font-medium">{plan.evening.main}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium text-sm">Protein:</span>
+                        <span className="text-purple-700 font-medium">{plan.evening.protein}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium text-sm">Vegetables:</span>
+                        <span className="text-purple-700 font-medium">{plan.evening.vegetables}</span>
+                      </div>
+                      <div className="flex justify-between items-start">
+                        <span className="font-medium text-sm">Calming Spices:</span>
+                        <span className="text-purple-700 font-medium text-right">{plan.evening.spices.join(', ')}</span>
                       </div>
                     </div>
-                  ))}
+                    <div className="mt-4 p-3 bg-purple-50 rounded">
+                      <p className="text-xs text-purple-700">
+                        <strong>Important:</strong> Keep dinner light and finish eating 3 hours before bedtime for optimal digestion.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <h4 className="font-semibold text-purple-800 mb-3">Preparation & Benefits</h4>
+                    <div className="space-y-3">
+                      <div>
+                        <h5 className="font-medium text-sm text-purple-700 mb-1">Evening Preparation:</h5>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{plan.evening.preparation}</p>
+                      </div>
+                      <div>
+                        <h5 className="font-medium text-sm text-purple-700 mb-1">Ayurvedic Benefits:</h5>
+                        <p className="text-sm text-green-600 leading-relaxed">💡 {plan.evening.ayurvedicNote}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
         </div>
 
-        {/* Ayurvedic Principles */}
+        {/* Nutritional Summary & Ayurvedic Principles */}
         <div className="px-8 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {/* Nutritional Summary */}
+            <Card>
+              <CardHeader className="bg-blue-50 print:bg-gray-50">
+                <CardTitle className="flex items-center space-x-2 text-blue-800">
+                  <Utensils className="h-5 w-5" />
+                  <span>Daily Nutritional Summary</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-3 bg-blue-50 rounded">
+                      <div className="text-2xl font-bold text-blue-700">{plan.nutritionalSummary.calories}</div>
+                      <div className="text-sm text-blue-600">Daily Calories</div>
+                    </div>
+                    <div className="text-center p-3 bg-green-50 rounded">
+                      <div className="text-2xl font-bold text-green-700">{plan.nutritionalSummary.protein}</div>
+                      <div className="text-sm text-green-600">Protein</div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-3 bg-yellow-50 rounded">
+                      <div className="text-2xl font-bold text-yellow-700">{plan.nutritionalSummary.carbs}</div>
+                      <div className="text-sm text-yellow-600">Carbohydrates</div>
+                    </div>
+                    <div className="text-center p-3 bg-purple-50 rounded">
+                      <div className="text-2xl font-bold text-purple-700">{plan.nutritionalSummary.fat}</div>
+                      <div className="text-sm text-purple-600">Healthy Fats</div>
+                    </div>
+                  </div>
+                  <div className="mt-4 p-3 bg-gray-50 rounded">
+                    <h5 className="font-medium text-sm mb-2">Dosha Analysis:</h5>
+                    <p className="text-sm text-muted-foreground">{plan.doshaAnalysis.constitution}</p>
+                    <p className="text-sm font-medium text-blue-600 mt-1">Primary: {plan.doshaAnalysis.primary.toUpperCase()}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Ayurvedic Principles */}
+            <Card>
+              <CardHeader className="bg-green-50 print:bg-gray-50">
+                <CardTitle className="flex items-center space-x-2 text-green-800">
+                  <Leaf className="h-5 w-5" />
+                  <span>Ayurvedic Dietary Guidelines</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold text-green-800 mb-3">
+                      For {getPrimaryDosha()} Constitution:
+                    </h4>
+                    <ul className="space-y-2">
+                      {plan.ayurvedicPrinciples.map((guideline: string, index: number) => (
+                        <li key={index} className="text-sm flex items-start space-x-2">
+                          <span className="text-green-500 mt-1">•</span>
+                          <span>{guideline}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="mt-4 p-3 bg-green-50 rounded">
+                    <h5 className="font-medium text-sm text-green-800 mb-2">Key Recommendations:</h5>
+                    {plan.doshaAnalysis.recommendations.map((rec: string, index: number) => (
+                      <p key={index} className="text-xs text-green-700 mb-1">• {rec}</p>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* General Guidelines */}
           <Card>
-            <CardHeader className="bg-green-50 print:bg-gray-50">
-              <CardTitle className="flex items-center space-x-2 text-green-800">
-                <Leaf className="h-5 w-5" />
-                <span>Ayurvedic Dietary Guidelines</span>
-              </CardTitle>
+            <CardHeader className="bg-yellow-50 print:bg-gray-50">
+              <CardTitle className="text-yellow-800">General Ayurvedic Eating Guidelines</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-semibold text-green-800 mb-3">
-                    For {getPrimaryDosha()} Constitution:
-                  </h4>
-                  <ul className="space-y-2">
-                    {plan.ayurvedicGuidelines.map((guideline: string, index: number) => (
-                      <li key={index} className="text-sm flex items-start space-x-2">
-                        <span className="text-green-500 mt-1">•</span>
-                        <span>{guideline}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-green-800 mb-3">General Guidelines:</h4>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start space-x-2">
-                      <span className="text-green-500 mt-1">•</span>
-                      <span>Eat in a calm, peaceful environment</span>
-                    </li>
-                    <li className="flex items-start space-x-2">
-                      <span className="text-green-500 mt-1">•</span>
-                      <span>Chew food thoroughly and eat mindfully</span>
-                    </li>
-                    <li className="flex items-start space-x-2">
-                      <span className="text-green-500 mt-1">•</span>
-                      <span>Avoid drinking cold water with meals</span>
-                    </li>
-                    <li className="flex items-start space-x-2">
-                      <span className="text-green-500 mt-1">•</span>
-                      <span>Maintain regular meal timings</span>
-                    </li>
-                    <li className="flex items-start space-x-2">
-                      <span className="text-green-500 mt-1">•</span>
-                      <span>Listen to your body's hunger signals</span>
-                    </li>
-                  </ul>
-                </div>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-start space-x-2">
+                    <span className="text-yellow-500 mt-1">•</span>
+                    <span>Eat in a calm, peaceful environment without distractions</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <span className="text-yellow-500 mt-1">•</span>
+                    <span>Chew food thoroughly and eat mindfully</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <span className="text-yellow-500 mt-1">•</span>
+                    <span>Maintain regular meal timings daily</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <span className="text-yellow-500 mt-1">•</span>
+                    <span>Eat only when genuinely hungry</span>
+                  </li>
+                </ul>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-start space-x-2">
+                    <span className="text-yellow-500 mt-1">•</span>
+                    <span>Avoid drinking cold water with meals</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <span className="text-yellow-500 mt-1">•</span>
+                    <span>Use fresh, seasonal ingredients when possible</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <span className="text-yellow-500 mt-1">•</span>
+                    <span>Cook with love and positive intention</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <span className="text-yellow-500 mt-1">•</span>
+                    <span>Rest briefly after meals before activity</span>
+                  </li>
+                </ul>
               </div>
             </CardContent>
           </Card>
@@ -383,16 +487,21 @@ export default function GeneratedDietChart() {
 
         {/* Footer */}
         <div className="px-8 pb-8 text-center border-t pt-6 print:border-gray-300">
-          <div className="flex items-center justify-center space-x-2 mb-2">
-            <Leaf className="h-5 w-5 text-green-600" />
-            <span className="font-bold text-green-800 font-['Playfair_Display']">AyurPractice</span>
+          <div className="text-center p-6 bg-gradient-to-r from-green-50 to-yellow-50 print:bg-gray-50 rounded-lg border">
+            <p className="text-sm text-muted-foreground mb-2">
+              This personalized diet chart has been prepared based on Ayurvedic principles and your individual constitution.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              For best results, follow consistently and consult with your Ayurvedic practitioner for any adjustments.
+            </p>
+            <div className="mt-4 flex items-center justify-center space-x-2">
+              <Leaf className="h-4 w-4 text-green-600" />
+              <span className="text-xs font-semibold text-green-800">AyurPractice Digital Platform</span>
+            </div>
+            <div className="mt-2 text-xs text-muted-foreground">
+              Generated on {new Date().toLocaleDateString('en-IN')} • Valid for 30 days • Follow up recommended in 2 weeks
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Preserving traditional wisdom through modern technology
-          </p>
-          <p className="text-xs text-muted-foreground mt-2">
-            Generated by AyurPractice Digital Platform • Follow up recommended in 2 weeks
-          </p>
         </div>
       </div>
     </div>

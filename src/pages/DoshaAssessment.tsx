@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { doshaAssessmentQuestions, doshaDescriptions } from "@/data/assessment";
 import { demoPatients } from "@/data/patients";
+import { patientService } from '@/services/patientService';
 
 // Question Card Component
 function QuestionCard({ 
@@ -225,13 +226,32 @@ function AssessmentResults({
 
 export default function DoshaAssessment() {
   const navigate = useNavigate();
-  const { patientId } = useParams();
+  const { id } = useParams<{ id: string }>();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<{ [key: number]: string }>({});
   const [showResults, setShowResults] = useState(false);
   const [doshaResults, setDoshaResults] = useState({ vata: 0, pitta: 0, kapha: 0 });
+  const [patient, setPatient] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const patient = patientId ? demoPatients.find(p => p.id === parseInt(patientId)) : null;
+  // Load patient data
+  useEffect(() => {
+    const loadPatient = async () => {
+      if (id) {
+        try {
+          const data = await patientService.getPatientById(id);
+          setPatient(data);
+        } catch (error) {
+          console.error('Error loading patient:', error);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    };
+    loadPatient();
+  }, [id]);
 
   const calculateDosha = () => {
     // Robust scoring: count answers (case-insensitive), ignore unanswered questions
@@ -307,14 +327,29 @@ export default function DoshaAssessment() {
     setDoshaResults({ vata: 0, pitta: 0, kapha: 0 });
   };
 
-  const handleComplete = () => {
-    if (patientId) {
-      navigate(`/patients/${patientId}/diet-chart/generator`, {
-        state: { assessmentResults: doshaResults }
-      });
+  const handleComplete = async () => {
+    const doshaResult = calculateDosha();
+    
+    if (id) {
+      try {
+        // Update patient's dosha in backend
+        await patientService.updatePatientDosha(id, doshaResult);
+        
+        // Navigate back to patient profile with success message
+        navigate(`/patients/${id}`, {
+          state: { 
+            message: 'Dosha assessment completed successfully!',
+            dosha: doshaResult 
+          }
+        });
+      } catch (error) {
+        console.error('Error updating patient dosha:', error);
+        alert('Failed to save dosha assessment. Please try again.');
+      }
     } else {
-      navigate('/diet-plan/generator', {
-        state: { assessmentResults: doshaResults }
+      // Handle case without patient ID (standalone assessment)
+      navigate('/dosha-result', {
+        state: { dosha: doshaResult }
       });
     }
   };

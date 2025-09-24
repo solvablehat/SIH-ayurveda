@@ -1,255 +1,368 @@
-import { useNavigate, useParams } from "react-router-dom";
-import { TopAppBar, TabBar } from "@/components/ui/navigation";
-import { DashboardWidget } from "@/components/DashboardWidget";
-import { 
-  Edit,
-  FileText,
-  Shield,
-  Activity,
-  Calendar,
-  User,
-  Phone,
-  Mail,
-  MapPin,
-  Clock,
-  TrendingUp
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+import React, { useState, useEffect, createContext, useContext } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ArrowLeft, UserCheck, Activity, FileText } from 'lucide-react';
+import { patientService, Patient } from '@/services/patientService';
+
+// Create a context to store current patient
+interface PatientContextType {
+  currentPatient: Patient | null;
+  setCurrentPatient: (patient: Patient | null) => void;
+}
+
+const PatientContext = createContext<PatientContextType>({
+  currentPatient: null,
+  setCurrentPatient: () => {}
+});
+
+export const usePatientContext = () => useContext(PatientContext);
 
 export default function PatientProfile() {
+  const { id } = useParams<{ id: string }>(); // Changed from patientId to id
   const navigate = useNavigate();
-  const { id } = useParams();
+  const [patient, setPatient] = useState<Patient | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock patient data - in real app this would come from API
-  const patient = {
-    id: id || "1",
-    name: "Priya Sharma",
-    age: 34,
-    gender: "Female",
-    phone: "+91 98765 43210",
-    email: "priya.sharma@email.com",
-    address: "123 MG Road, Bangalore, Karnataka",
-    dosha: "Pitta",
-    prakriti: "Pitta-Vata",
-    vikriti: "Pitta excess",
-    lastVisit: "2024-01-15",
-    nextAppointment: "2024-01-29",
-    compliance: 92,
-    dietPlans: [
-      { name: "Summer Cooling Diet", date: "2024-01-10", status: "active" },
-      { name: "Digestive Balance Plan", date: "2024-01-05", status: "completed" }
-    ],
-    assessments: [
-      { type: "Prakriti Assessment", date: "2024-01-15", score: "Pitta dominant" },
-      { type: "Vikriti Analysis", date: "2024-01-15", score: "Moderate imbalance" }
-    ],
-    medicalHistory: [
-      "Gastritis (2023)",
-      "Stress-related symptoms",
-      "Seasonal allergies"
-    ]
-  };
+  useEffect(() => {
+    console.log('PatientProfile mounted, id:', id); // Changed from patientId to id
+    if (id) {
+      loadPatient(id);
+    } else {
+      setError('No patient ID provided');
+      setLoading(false);
+    }
+  }, [id]); // Changed from patientId to id
 
-  const getDoshaColor = (dosha: string) => {
-    switch (dosha) {
-      case 'Vata': return "bg-purple-100 text-purple-800 border-purple-200";
-      case 'Pitta': return "bg-red-100 text-red-800 border-red-200";
-      case 'Kapha': return "bg-blue-100 text-blue-800 border-blue-200";
-      default: return "bg-gray-100 text-gray-800 border-gray-200";
+  const loadPatient = async (patientId: string) => { // Keep parameter name as patientId for clarity
+    try {
+      console.log('Loading patient with ID:', patientId);
+      setLoading(true);
+      setError(null);
+      
+      const data = await patientService.getPatientById(patientId);
+      console.log('Loaded patient data:', data);
+      
+      setPatient(data);
+      
+      // Store patient in localStorage for access across pages
+      localStorage.setItem('currentPatient', JSON.stringify(data));
+      localStorage.setItem('currentPatientId', patientId);
+      
+    } catch (error) {
+      console.error('Error loading patient:', error);
+      setError('Failed to load patient details. Please check if the patient exists.');
+    } finally {
+      setLoading(false);
     }
   };
 
+  const getDominantDosha = (dosha: { vata: number; pitta: number; kapha: number }) => {
+    const entries = Object.entries(dosha);
+    const dominant = entries.reduce((max, current) => 
+      current[1] > max[1] ? current : max
+    );
+    return {
+      name: dominant[0].charAt(0).toUpperCase() + dominant[0].slice(1),
+      percentage: dominant[1]
+    };
+  };
+
+  const getDoshaColor = (doshaName: string) => {
+    switch (doshaName.toLowerCase()) {
+      case 'vata': return 'bg-purple-100 text-purple-800';
+      case 'pitta': return 'bg-red-100 text-red-800';
+      case 'kapha': return 'bg-blue-100 text-blue-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const handleGenerateDosha = () => {
+    console.log('Navigating to dosha assessment for patient:', id);
+    navigate(`/patients/${id}/dosha-assessment`);
+  };
+
+  const handleGenerateDietPlan = () => {
+    console.log('Navigating to diet plan generator for patient:', id);
+    navigate(`/diet-plan/generator`, {
+      state: { selectedPatientId: id, selectedPatient: patient }
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+        <p>Loading patient details...</p>
+        <p className="text-sm text-gray-500">Patient ID: {id}</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col justify-center items-center min-h-screen">
+        <p className="text-red-500 mb-4">{error}</p>
+        <p className="text-sm text-gray-500 mb-4">Patient ID: {id}</p>
+        <div className="space-x-2">
+          <Button onClick={() => loadPatient(id!)}>Retry</Button>
+          <Button variant="outline" onClick={() => navigate('/patients')}>Back to Patients</Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!patient) {
+    return (
+      <div className="flex flex-col justify-center items-center min-h-screen">
+        <p className="text-red-500 mb-4">Patient not found</p>
+        <Button onClick={() => navigate('/patients')}>Back to Patients</Button>
+      </div>
+    );
+  }
+
+  const dominantDosha = patient.dosha ? getDominantDosha(patient.dosha) : null;
+
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <TopAppBar 
-        title={patient.name}
-        showBack
-        onBack={() => navigate('/patients')}
-        rightAction={
-          <button 
-            onClick={() => navigate(`/patients/${id}/edit`)}
-            className="p-2 hover:bg-primary/80 rounded-lg transition-colors"
-          >
-            <Edit className="h-5 w-5 text-primary-foreground" />
-          </button>
-        }
-      />
-      
-      <div className="p-6 space-y-6">
-        {/* Patient Overview */}
-        <div className="bg-gradient-wellness rounded-xl p-6 border border-border/30">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center">
-                <User className="h-8 w-8 text-primary-foreground" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-playfair font-bold text-foreground">
-                  {patient.name}
-                </h2>
-                <p className="text-muted-foreground font-poppins">
-                  {patient.age} years • {patient.gender}
-                </p>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => navigate('/patients')}
+                className="p-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <div className="flex items-center space-x-2">
+                <UserCheck className="h-5 w-5 text-primary" />
+                <h1 className="text-2xl font-bold">Patient Profile</h1>
               </div>
             </div>
             
-            <div className="text-right">
-              <div className="flex items-center gap-1 mb-1">
-                <Activity className="h-4 w-4 text-green-600" />
-                <span className="font-poppins font-semibold text-green-600">
-                  {patient.compliance}%
-                </span>
-              </div>
-              <span className="text-xs text-muted-foreground font-poppins">
-                compliance
-              </span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className={cn(
-              "px-3 py-2 rounded-lg border text-center",
-              getDoshaColor(patient.dosha)
-            )}>
-              <p className="text-sm font-poppins font-medium">Prakriti</p>
-              <p className="font-playfair font-semibold">{patient.prakriti}</p>
-            </div>
-            <div className="px-3 py-2 rounded-lg border bg-orange-100 text-orange-800 border-orange-200 text-center">
-              <p className="text-sm font-poppins font-medium">Vikriti</p>
-              <p className="font-playfair font-semibold">{patient.vikriti}</p>
+            {/* Action Buttons */}
+            <div className="flex space-x-2">
+              <Button 
+                onClick={handleGenerateDosha}
+                variant="outline"
+                className="flex items-center space-x-2"
+              >
+                <Activity className="h-4 w-4" />
+                <span>Generate Dosha</span>
+              </Button>
+              
+              {patient.dosha && (
+                <Button 
+                  onClick={handleGenerateDietPlan}
+                  className="flex items-center space-x-2"
+                >
+                  <FileText className="h-4 w-4" />
+                  <span>Generate Diet Plan</span>
+                </Button>
+              )}
             </div>
           </div>
         </div>
-
-        {/* Basic Information */}
-        <DashboardWidget title="Basic Information">
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <Phone className="h-5 w-5 text-muted-foreground" />
-              <span className="font-poppins">{patient.phone}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Mail className="h-5 w-5 text-muted-foreground" />
-              <span className="font-poppins">{patient.email}</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
-              <span className="font-poppins">{patient.address}</span>
-            </div>
-          </div>
-        </DashboardWidget>
-
-        {/* Medical History */}
-        <DashboardWidget title="Medical History">
-          <div className="space-y-2">
-            {patient.medicalHistory.map((condition, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-primary rounded-full" />
-                <span className="font-poppins text-foreground">{condition}</span>
-              </div>
-            ))}
-          </div>
-        </DashboardWidget>
-
-        {/* Diet Plans */}
-        <DashboardWidget title="Diet Plans">
-          <div className="space-y-3">
-            {patient.dietPlans.map((plan, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-gradient-wellness rounded-lg">
-                <div>
-                  <p className="font-poppins font-semibold text-foreground">
-                    {plan.name}
-                  </p>
-                  <p className="text-sm text-muted-foreground font-poppins">
-                    Created: {new Date(plan.date).toLocaleDateString()}
-                  </p>
-                </div>
-                <span className={cn(
-                  "px-3 py-1 rounded-full text-xs font-poppins font-medium",
-                  plan.status === 'active' 
-                    ? "bg-green-100 text-green-800" 
-                    : "bg-gray-100 text-gray-800"
-                )}>
-                  {plan.status}
-                </span>
-              </div>
-            ))}
-          </div>
-        </DashboardWidget>
-
-        {/* Assessments */}
-        <DashboardWidget title="Assessments">
-          <div className="space-y-3">
-            {patient.assessments.map((assessment, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-gradient-wellness rounded-lg">
-                <div>
-                  <p className="font-poppins font-semibold text-foreground">
-                    {assessment.type}
-                  </p>
-                  <p className="text-sm text-muted-foreground font-poppins">
-                    {new Date(assessment.date).toLocaleDateString()}
-                  </p>
-                </div>
-                <span className="text-primary font-poppins font-medium">
-                  {assessment.score}
-                </span>
-              </div>
-            ))}
-          </div>
-        </DashboardWidget>
-
-        {/* Actions */}
-        <DashboardWidget title="Actions">
-          <div className="space-y-3">
-            <button
-              onClick={() => navigate(`/patients/${id}/diet-chart/new`)}
-              className="w-full bg-gradient-primary text-primary-foreground p-4 rounded-xl hover:shadow-elevated transition-all duration-200 hover:scale-[1.02]"
-            >
-              <div className="flex items-center gap-3">
-                <FileText className="h-5 w-5" />
-                <div className="text-left">
-                  <p className="font-poppins font-semibold">Create New Diet Chart</p>
-                  <p className="text-sm text-primary-foreground/80 font-poppins">
-                    Generate personalized Ayurvedic diet plan
-                  </p>
-                </div>
-              </div>
-            </button>
-
-            <button
-              onClick={() => navigate(`/patients/${id}/vault`)}
-              className="w-full bg-card border border-border text-card-foreground p-4 rounded-xl hover:bg-muted transition-all duration-200"
-            >
-              <div className="flex items-center gap-3">
-                <Shield className="h-5 w-5 text-primary" />
-                <div className="text-left">
-                  <p className="font-poppins font-semibold">Access Patient Vault</p>
-                  <p className="text-sm text-muted-foreground font-poppins">
-                    View secure health records
-                  </p>
-                </div>
-              </div>
-            </button>
-
-            <button
-              onClick={() => navigate(`/assessment/new?patient=${id}`)}
-              className="w-full bg-card border border-border text-card-foreground p-4 rounded-xl hover:bg-muted transition-all duration-200"
-            >
-              <div className="flex items-center gap-3">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                <div className="text-left">
-                  <p className="font-poppins font-semibold">Start Assessment</p>
-                  <p className="text-sm text-muted-foreground font-poppins">
-                    Begin Prakriti-Vikriti analysis
-                  </p>
-                </div>
-              </div>
-            </button>
-          </div>
-        </DashboardWidget>
       </div>
 
-      <TabBar />
+      <div className="container mx-auto px-6 py-8">
+        <div className="max-w-4xl mx-auto space-y-6">
+          {/* Patient Basic Info */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center space-x-4">
+                <Avatar className="h-16 w-16">
+                  <AvatarImage src={patient.photo} alt={patient.name} />
+                  <AvatarFallback className="text-lg">
+                    {patient.name.split(' ').map(n => n[0]).join('')}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <CardTitle className="text-2xl">{patient.name}</CardTitle>
+                  <p className="text-muted-foreground">
+                    {patient.age} years • {patient.gender}
+                  </p>
+                </div>
+              </div>
+            </CardHeader>
+            
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium text-sm text-muted-foreground">Contact Information</h4>
+                    <p className="font-medium">{patient.phone}</p>
+                    {patient.email && <p className="text-sm text-muted-foreground">{patient.email}</p>}
+                  </div>
+                  
+                  {patient.address && (
+                    <div>
+                      <h4 className="font-medium text-sm text-muted-foreground">Address</h4>
+                      <p className="text-sm">{patient.address}</p>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="space-y-4">
+                  {dominantDosha ? (
+                    <div>
+                      <h4 className="font-medium text-sm text-muted-foreground">Dosha Profile</h4>
+                      <div className="flex items-center space-x-2">
+                        <Badge className={getDoshaColor(dominantDosha.name)}>
+                          {dominantDosha.name} {dominantDosha.percentage}%
+                        </Badge>
+                      </div>
+                      <div className="mt-2 space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span>Vata: {patient.dosha!.vata}%</span>
+                          <span>Pitta: {patient.dosha!.pitta}%</span>
+                          <span>Kapha: {patient.dosha!.kapha}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <h4 className="font-medium text-sm text-muted-foreground">Dosha Profile</h4>
+                      <p className="text-sm text-gray-500">No dosha assessment completed yet</p>
+                      <Button 
+                        onClick={handleGenerateDosha}
+                        size="sm"
+                        variant="outline"
+                        className="mt-2"
+                      >
+                        Take Assessment
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {patient.compliance && (
+                    <div>
+                      <h4 className="font-medium text-sm text-muted-foreground">Compliance Rate</h4>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <div className="flex-1 bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-green-500 h-2 rounded-full" 
+                            style={{ width: `${patient.compliance}%` }}
+                          />
+                        </div>
+                        <span className="text-sm font-medium">{patient.compliance}%</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Medical Information */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Conditions */}
+            {patient.conditions && patient.conditions.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Medical Conditions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {patient.conditions.map((condition, index) => (
+                      <Badge key={index} variant="secondary">
+                        {condition}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Medications */}
+            {patient.medications && patient.medications.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Current Medications</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {patient.medications.map((medication, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-sm">{medication}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Medical History */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {patient.pastDiseases && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Past Diseases</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm">{patient.pastDiseases}</p>
+                </CardContent>
+              </Card>
+            )}
+
+            {patient.currentDiet && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Current Diet</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm">{patient.currentDiet}</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Appointments */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Appointments</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {patient.lastVisit && (
+                  <div>
+                    <h4 className="font-medium text-sm text-muted-foreground">Last Visit</h4>
+                    <p className="font-medium">{new Date(patient.lastVisit).toLocaleDateString()}</p>
+                  </div>
+                )}
+                
+                {patient.nextAppointment && (
+                  <div>
+                    <h4 className="font-medium text-sm text-muted-foreground">Next Appointment</h4>
+                    <p className="font-medium">{new Date(patient.nextAppointment).toLocaleDateString()}</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Notes */}
+          {patient.notes && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Clinical Notes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm">{patient.notes}</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

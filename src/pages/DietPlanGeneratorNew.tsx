@@ -16,7 +16,7 @@ import {
   ChefHat,
   Leaf
 } from "lucide-react";
-import { demoPatients } from "@/data/patients";
+import { patientService, Patient } from "@/services/patientService";
 import { foodDatabase, ayurvedicPrinciples } from "@/data/foods";
 
 // Patient Selector Component
@@ -25,6 +25,23 @@ function PatientSelector({ selectedPatient, onSelect }: {
   onSelect: (patient: any) => void; 
 }) {
   const [showPatients, setShowPatients] = useState(false);
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        setLoading(true);
+        const data = await patientService.getAllPatients();
+        setPatients(data);
+      } catch (error) {
+        console.error('Error fetching patients:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPatients();
+  }, []);
 
   return (
     <Card>
@@ -47,9 +64,11 @@ function PatientSelector({ selectedPatient, onSelect }: {
               <h3 className="font-medium">{selectedPatient.name}</h3>
               <p className="text-sm text-muted-foreground">
                 {selectedPatient.age} years • Primary Dosha: {
-                  selectedPatient.dosha.vata >= selectedPatient.dosha.pitta && 
-                  selectedPatient.dosha.vata >= selectedPatient.dosha.kapha ? 'Vata' :
-                  selectedPatient.dosha.pitta >= selectedPatient.dosha.kapha ? 'Pitta' : 'Kapha'
+                  selectedPatient.dosha ? (
+                    selectedPatient.dosha.vata >= selectedPatient.dosha.pitta && 
+                    selectedPatient.dosha.vata >= selectedPatient.dosha.kapha ? 'Vata' :
+                    selectedPatient.dosha.pitta >= selectedPatient.dosha.kapha ? 'Pitta' : 'Kapha'
+                  ) : 'Not assessed'
                 }
               </p>
             </div>
@@ -73,27 +92,33 @@ function PatientSelector({ selectedPatient, onSelect }: {
 
         {showPatients && (
           <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
-            {demoPatients.map(patient => (
-              <div
-                key={patient.id}
-                className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-muted/50"
-                onClick={() => {
-                  onSelect(patient);
-                  setShowPatients(false);
-                }}
-              >
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={patient.photo} />
-                  <AvatarFallback>
-                    {patient.name.split(' ').map(n => n[0]).join('')}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-medium">{patient.name}</p>
-                  <p className="text-xs text-muted-foreground">{patient.age} years</p>
+            {loading ? (
+              <div className="p-4 text-center text-gray-500">Loading patients...</div>
+            ) : patients.length === 0 ? (
+              <div className="p-4 text-center text-gray-500">No patients found</div>
+            ) : (
+              patients.map(patient => (
+                <div
+                  key={patient._id}
+                  className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-muted/50"
+                  onClick={() => {
+                    onSelect(patient);
+                    setShowPatients(false);
+                  }}
+                >
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={patient.photo} />
+                    <AvatarFallback>
+                      {patient.name.split(' ').map(n => n[0]).join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">{patient.name}</p>
+                    <p className="text-xs text-muted-foreground">{patient.age} years</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         )}
       </CardContent>
@@ -415,7 +440,7 @@ function GeneratedPlanDisplay({ plan, patient }: { plan: any; patient: any }) {
       {/* Action Buttons */}
       <div className="flex space-x-4">
         <Button 
-          onClick={() => navigate(`/diet-chart/${patient.id}/generated`, { 
+          onClick={() => navigate(`/diet-chart/${patient._id}/generated`, { 
             state: { plan, patient } 
           })}
           className="flex items-center space-x-2"
@@ -451,12 +476,17 @@ export default function DietPlanGenerator() {
 
   // Initialize with patient from URL parameter
   useEffect(() => {
-    if (patientId) {
-      const patient = demoPatients.find(p => p.id === parseInt(patientId));
-      if (patient) {
-        setSelectedPatient(patient);
+    const fetchPatient = async () => {
+      if (patientId) {
+        try {
+          const patient = await patientService.getPatientById(patientId);
+          setSelectedPatient(patient);
+        } catch (error) {
+          console.error('Error fetching patient:', error);
+        }
       }
-    }
+    };
+    fetchPatient();
   }, [patientId]);
 
   const getPrimaryDosha = (dosha: any) => {

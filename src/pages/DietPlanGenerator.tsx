@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { TopAppBar } from "@/components/ui/navigation";
 import { Input } from "@/components/ui/input";
@@ -16,15 +16,19 @@ import {
   AlertCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { patientService, Patient } from '@/services/patientService';
 
 export default function DietPlanGenerator() {
   const navigate = useNavigate();
   const { patientId } = useParams();
   
+  const [selectedPatientId, setSelectedPatientId] = useState<string>(patientId || '');
   const [selectedDosha, setSelectedDosha] = useState<'Vata' | 'Pitta' | 'Kapha' | ''>('');
   const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
   const [selectedFoodCategories, setSelectedFoodCategories] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [loadingPatients, setLoadingPatients] = useState(false);
 
   const doshas = [
     {
@@ -66,6 +70,39 @@ export default function DietPlanGenerator() {
     { name: 'Nuts & Seeds', icon: '🥜' },
     { name: 'Oils & Fats', icon: '🫒' }
   ];
+
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        setLoadingPatients(true);
+        const data = await patientService.getAllPatients();
+        setPatients(data);
+      } catch (error) {
+        console.error('Error fetching patients:', error);
+      } finally {
+        setLoadingPatients(false);
+      }
+    };
+    
+    fetchPatients();
+  }, []);
+
+  // Auto-populate dosha and conditions when patient is selected
+  useEffect(() => {
+    if (selectedPatientId && patients.length > 0) {
+      const patient = patients.find(p => p._id === selectedPatientId);
+      if (patient?.dosha) {
+        // Find dominant dosha
+        const { vata, pitta, kapha } = patient.dosha;
+        if (vata >= pitta && vata >= kapha) setSelectedDosha('Vata');
+        else if (pitta >= vata && pitta >= kapha) setSelectedDosha('Pitta');
+        else setSelectedDosha('Kapha');
+      }
+      if (patient?.conditions) {
+        setSelectedConditions(patient.conditions);
+      }
+    }
+  }, [selectedPatientId, patients]);
 
   const handleGenerate = async () => {
     if (!selectedDosha) {
@@ -111,6 +148,51 @@ export default function DietPlanGenerator() {
       />
       
       <div className="p-6 space-y-8">
+        {/* Patient Selection */}
+        <div>
+          <h3 className="text-lg font-playfair font-semibold text-foreground mb-4 flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Choose Patient
+          </h3>
+          <div className="space-y-3">
+            {loadingPatients ? (
+              <div className="p-4 text-center text-gray-500">Loading patients...</div>
+            ) : patients.length === 0 ? (
+              <div className="p-4 text-center text-gray-500 flex items-center justify-center gap-2">
+                <AlertCircle className="h-5 w-5" />
+                No patients found
+              </div>
+            ) : (
+              patients.map((patient) => (
+                <button
+                  key={patient._id}
+                  onClick={() => setSelectedPatientId(patient._id || '')}
+                  className={cn(
+                    "w-full p-4 rounded-xl border-2 transition-all duration-200 text-left",
+                    selectedPatientId === patient._id
+                      ? 'border-primary bg-primary/5 shadow-wellness scale-[1.02]'
+                      : 'bg-card border-border hover:bg-muted'
+                  )}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold">{patient.name}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        {patient.age} years, {patient.gender}
+                      </p>
+                    </div>
+                    {patient.dosha && (
+                      <div className="text-sm text-primary">
+                        Has Dosha Profile
+                      </div>
+                    )}
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+
         {/* Patient Dosha Profile */}
         <div>
           <h3 className="text-lg font-playfair font-semibold text-foreground mb-4">

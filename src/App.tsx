@@ -9,7 +9,7 @@ import { ProtectedRoute, PublicRoute } from "@/components/ProtectedRoute";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import PatientList from "./pages/PatientList";
-import PatientProfile from "./pages/PatientProfile";
+import PatientProfile from "@/pages/PatientProfile";
 import NewDietChart from "./pages/NewDietChart";
 import DietPlanGenerator from "./pages/DietPlanGenerator";
 import ComplianceTracking from "./pages/ComplianceTracking";
@@ -21,6 +21,8 @@ import NotFound from "./pages/NotFound";
 import DoshaAssessment from "./pages/DoshaAssessment";
 import DietPlanGeneratorNew from "./pages/DietPlanGeneratorNew";
 import GeneratedDietChart from "./pages/GeneratedDietChart";
+
+import AddPatient from "./pages/AddPatient";
 
 const queryClient = new QueryClient();
 
@@ -48,17 +50,19 @@ const App = () => (
                     <Route path="/patients" element={<PatientList />} />
                     <Route path="/patients/:id" element={<PatientProfile />} />
                     <Route path="/patients/:patientId/diet-chart/new" element={<NewDietChart />} />
-                    <Route path="/patients/:patientId/diet-chart/generator" element={<DietPlanGenerator />} />
+                    {/* <Route path="/patients/:patientId/diet-chart/generator" element={<DietPlanGenerator />} /> */}
                     <Route path="/compliance" element={<ComplianceTracking />} />
                     <Route path="/appointments" element={<Appointments />} />
                     <Route path="/appointments/new" element={<NewAppointment />} />
                     <Route path="/profile" element={<Profile />} />
-                    
+                    <Route path="/patients/add" element={<AddPatient />} />
+
                     {/* NEW CORE 6 SCREENS ROUTES */}
                     <Route path="/assessment/:patientId" element={<DoshaAssessment />} />
                     <Route path="/assessment" element={<DoshaAssessment />} />
                     <Route path="/diet-plan/generator" element={<DietPlanGeneratorNew />} />
                     <Route path="/diet-chart/:patientId/generated" element={<GeneratedDietChart />} />
+                    <Route path="/patients/:id/dosha-assessment" element={<DoshaAssessment />} />
                     
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />

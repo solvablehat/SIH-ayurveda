@@ -1,4 +1,6 @@
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { patientService } from "@/services/patientService";
 import { DashboardWidget, MetricCard, QuickAction } from "@/components/DashboardWidget";
 import { 
   ComplianceChart, 
@@ -21,17 +23,95 @@ import {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  
+  // State for real data
+  const [dashboardData, setDashboardData] = useState({
+    patients: [],
+    totalPatients: 0,
+    todayAppointments: 0,
+    complianceMetrics: {
+      overall: 0,
+      trend: "+0%",
+      needingAttention: 0
+    },
+    doshaDistribution: [],
+    recentPatients: [],
+    loading: true
+  });
 
-  const upcomingAppointments = [
-    { name: "Priya Sharma", time: "10:00 AM", type: "Follow-up" },
-    { name: "Ravi Kumar", time: "11:30 AM", type: "New Assessment" },
-    { name: "Anjali Patel", time: "2:00 PM", type: "Diet Review" }
-  ];
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
-  const complianceMetrics = {
-    overall: 85,
-    trend: "+5%",
-    needingAttention: 3
+  const fetchDashboardData = async () => {
+    try {
+      // Fetch all patients
+      const patients = await patientService.getAllPatients();
+      
+      // Calculate dosha distribution
+      const doshaStats = calculateDoshaDistribution(patients);
+      
+      // Calculate compliance metrics
+      const compliance = calculateComplianceMetrics(patients);
+      
+      // Get today's appointments (mock for now - you can replace with real API)
+      const todayAppointments = patients.filter(p => p.nextAppointment && 
+        new Date(p.nextAppointment).toDateString() === new Date().toDateString()
+      ).length;
+
+      setDashboardData({
+        patients,
+        totalPatients: patients.length,
+        todayAppointments,
+        complianceMetrics: compliance,
+        doshaDistribution: doshaStats,
+        recentPatients: patients.slice(-3).reverse(), // Last 3 patients as upcoming appointments
+        loading: false
+      });
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      setDashboardData(prev => ({ ...prev, loading: false }));
+    }
+  };
+
+  const calculateDoshaDistribution = (patients) => {
+    const doshaCount = { vata: 0, pitta: 0, kapha: 0 };
+    let totalWithDosha = 0;
+
+    patients.forEach(patient => {
+      if (patient.dosha) {
+        totalWithDosha++;
+        const { vata, pitta, kapha } = patient.dosha;
+        if (vata >= pitta && vata >= kapha) doshaCount.vata++;
+        else if (pitta >= kapha) doshaCount.pitta++;
+        else doshaCount.kapha++;
+      }
+    });
+
+    if (totalWithDosha === 0) return [];
+
+    return [
+      { name: 'Vata', value: Math.round((doshaCount.vata / totalWithDosha) * 100), color: 'hsl(var(--primary))' },
+      { name: 'Pitta', value: Math.round((doshaCount.pitta / totalWithDosha) * 100), color: 'hsl(var(--secondary))' },
+      { name: 'Kapha', value: Math.round((doshaCount.kapha / totalWithDosha) * 100), color: 'hsl(var(--accent))' },
+    ];
+  };
+
+  const calculateComplianceMetrics = (patients) => {
+    const patientsWithCompliance = patients.filter(p => p.compliance !== undefined);
+    if (patientsWithCompliance.length === 0) {
+      return { overall: 0, trend: "+0%", needingAttention: 0 };
+    }
+
+    const totalCompliance = patientsWithCompliance.reduce((sum, p) => sum + p.compliance, 0);
+    const averageCompliance = Math.round(totalCompliance / patientsWithCompliance.length);
+    const needingAttention = patientsWithCompliance.filter(p => p.compliance < 70).length;
+
+    return {
+      overall: averageCompliance,
+      trend: "+5%", // This would come from historical data
+      needingAttention
+    };
   };
 
   // Chart data
@@ -91,19 +171,19 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <MetricCard
           label="Today's Appointments"
-          value={3}
+          value={dashboardData.loading ? "..." : dashboardData.todayAppointments}
           icon={<Calendar className="h-5 w-5" />}
         />
         <MetricCard
           label="Total Patients"
-          value={247}
+          value={dashboardData.loading ? "..." : dashboardData.totalPatients}
           trend={{ value: "+25 this month", isPositive: true }}
           icon={<Users className="h-5 w-5" />}
         />
         <MetricCard
           label="Overall Compliance"
-          value={`${complianceMetrics.overall}%`}
-          trend={{ value: complianceMetrics.trend, isPositive: true }}
+          value={dashboardData.loading ? "..." : `${dashboardData.complianceMetrics.overall}%`}
+          trend={{ value: dashboardData.complianceMetrics.trend, isPositive: true }}
           icon={<TrendingUp className="h-5 w-5" />}
         />
         <MetricCard
@@ -121,33 +201,41 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DoshaDistributionChart data={doshaData} />
+        <DoshaDistributionChart data={dashboardData.loading ? [] : dashboardData.doshaDistribution} />
         <TreatmentEffectivenessChart data={treatmentData} />
       </div>
 
       {/* Content Sections */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Upcoming Appointments Widget */}
+        {/* Recent Patients Widget */}
         <DashboardWidget
-          title="Upcoming Appointments"
+          title="Recent Patients"
           action={{
             label: "View All",
-            onClick: () => navigate('/appointments')
+            onClick: () => navigate('/patients')
           }}
         >
           <div className="space-y-3">
-            {upcomingAppointments.map((appointment, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-gradient-wellness rounded-lg">
-                <div>
-                  <p className="font-semibold text-foreground">{appointment.name}</p>
-                  <p className="text-sm text-muted-foreground">{appointment.type}</p>
+            {dashboardData.loading ? (
+              <div className="text-center text-muted-foreground">Loading...</div>
+            ) : dashboardData.recentPatients.length === 0 ? (
+              <div className="text-center text-muted-foreground">No patients found</div>
+            ) : (
+              dashboardData.recentPatients.map((patient, index) => (
+                <div key={patient._id || index} className="flex items-center justify-between p-3 bg-gradient-wellness rounded-lg">
+                  <div>
+                    <p className="font-semibold text-foreground">{patient.name}</p>
+                    <p className="text-sm text-muted-foreground">{patient.age} years, {patient.gender}</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-primary">
+                    <Activity className="h-4 w-4" />
+                    <span className="font-medium">
+                      {patient.dosha ? 'Has Dosha' : 'Pending Assessment'}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 text-primary">
-                  <Clock className="h-4 w-4" />
-                  <span className="font-medium">{appointment.time}</span>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </DashboardWidget>
 
@@ -163,21 +251,21 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <span className="text-foreground">Overall Compliance</span>
               <span className="text-2xl font-playfair font-bold text-primary">
-                {complianceMetrics.overall}%
+                {dashboardData.loading ? "..." : `${dashboardData.complianceMetrics.overall}%`}
               </span>
             </div>
             
             <div className="w-full bg-muted rounded-full h-3">
               <div 
                 className="bg-gradient-primary h-3 rounded-full transition-all duration-300"
-                style={{ width: `${complianceMetrics.overall}%` }}
+                style={{ width: `${dashboardData.complianceMetrics.overall}%` }}
               />
             </div>
 
             <div className="flex items-center gap-2 text-amber-600">
               <Activity className="h-4 w-4" />
               <span className="text-sm font-poppins">
-                {complianceMetrics.needingAttention} patients need attention
+                {dashboardData.loading ? "..." : `${dashboardData.complianceMetrics.needingAttention} patients need attention`}
               </span>
             </div>
           </div>

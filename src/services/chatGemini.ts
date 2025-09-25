@@ -52,6 +52,30 @@ class GeminiChatService {
 - Provide contraindications and precautions
 - Frame answers for professional healthcare providers
 
+**Response Format:**
+You MUST always respond in JSON format with this exact structure:
+
+For regular Ayurvedic questions:
+{
+  "dataNeeded": false,
+  "message": "Your detailed Ayurvedic response here with all formatting and information"
+}
+
+For patient-specific queries where you need patient data:
+{
+  "dataNeeded": true,
+  "message": "Requesting patient data",
+  "searchBy": "name|phone|email|id",
+  "value": "EXACT_VALUE_TO_SEARCH"
+}
+
+Examples:
+- User asks about turmeric → {"dataNeeded": false, "message": "**Turmeric (Haridra)** is one of the most revered herbs..."}
+- User asks "Tell me about Mohammed Yaseen Agha" → {"dataNeeded": true, "message": "Requesting patient data", "searchBy": "name", "value": "Mohammed Yaseen Agha"}
+- User asks "Show patient +91-9876543210" → {"dataNeeded": true, "message": "Requesting patient data", "searchBy": "phone", "value": "+91-9876543210"}
+
+Never provide responses outside this JSON structure.
+
 **Important Disclaimers:**
 - You provide educational information, not medical diagnoses
 - Always remind practitioners to use their clinical judgment
@@ -93,6 +117,25 @@ Remember: You are integrated into Vitarva, helping practitioners provide better 
           topK: 40,
           topP: 0.95,
           maxOutputTokens: 2048,
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "object",
+            properties: {
+              dataNeeded: {
+                type: "boolean"
+              },
+              message: {
+                type: "string"
+              },
+              searchBy: {
+                type: "string"
+              },
+              value: {
+                type: "string"
+              }
+            },
+            required: ["dataNeeded", "message"]
+          }
         },
         safetySettings: [
           {
@@ -133,23 +176,55 @@ Remember: You are integrated into Vitarva, helping practitioners provide better 
         throw new Error('No response generated from Gemini API');
       }
 
-      const aiResponse = data.candidates[0].content.parts[0].text;
+      const aiResponseText = data.candidates[0].content.parts[0].text;
       
-      // Add AI response to conversation history
-      this.conversationHistory.push({
-        role: 'model',
-        parts: [{ text: aiResponse }]
-      });
+      try {
+        // Parse the structured JSON response
+        const aiResponse = JSON.parse(aiResponseText);
+        
+        // Check if this is a data request - if so, handle it silently
+        if (aiResponse.dataNeeded === true) {
+          const patientData = await this.handleDataRequest(aiResponseText);
+          if (patientData) {
+            // Send patient data back to Gemini for analysis and return the final response
+            return await this.sendMessageWithPatientData(userMessage, patientData);
+          }
+          // If data handling failed, fall back to error message
+          return this.getErrorResponse('Data Retrieval Error', 
+            'I encountered an issue while retrieving patient information. Please try again.');
+        }
+        
+        // Regular response - return the message content
+        const responseMessage = aiResponse.message || aiResponseText;
+        
+        // Add AI response to conversation history
+        this.conversationHistory.push({
+          role: 'model',
+          parts: [{ text: responseMessage }]
+        });
 
-      // Keep conversation history manageable (last 10 exchanges)
-      if (this.conversationHistory.length > 21) { // 1 system + 20 exchanges
-        this.conversationHistory = [
-          this.conversationHistory[0], // Keep system prompt
-          ...this.conversationHistory.slice(-20) // Keep last 20 messages
-        ];
+        // Keep conversation history manageable (last 10 exchanges)
+        if (this.conversationHistory.length > 21) { // 1 system + 20 exchanges
+          this.conversationHistory = [
+            this.conversationHistory[0], // Keep system prompt
+            ...this.conversationHistory.slice(-20) // Keep last 20 messages
+          ];
+        }
+
+        return this.formatResponse(responseMessage);
+        
+      } catch (parseError) {
+        console.error('Error parsing structured response:', parseError);
+        // Fallback to treating as plain text
+        const responseMessage = aiResponseText;
+        
+        this.conversationHistory.push({
+          role: 'model',
+          parts: [{ text: responseMessage }]
+        });
+
+        return this.formatResponse(responseMessage);
       }
-
-      return this.formatResponse(aiResponse);
       
     } catch (error) {
       console.error('Error calling Gemini API:', error);
@@ -220,6 +295,221 @@ ${message}
   // Method to check if API is configured
   isConfigured(): boolean {
     return !!this.apiKey;
+  }
+
+  // Strip code formatting from responses
+  private stripCodeFormatting(response: string): string {
+    let cleaned = response.trim();
+    
+    // Remove ```json formatting
+    if (cleaned.startsWith('```json')) {
+      cleaned = cleaned.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } 
+    // Remove generic ``` formatting
+    else if (cleaned.startsWith('```')) {
+      cleaned = cleaned.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    }
+    
+    return cleaned.trim();
+  }
+
+  // Check if response is a data request
+  private isDataRequest(response: string): boolean {
+    try {
+      const parsed = JSON.parse(response.trim());
+      return parsed.dataNeeded === true && parsed.searchBy && parsed.value;
+    } catch {
+      return false;
+    }
+  }
+
+  // Handle patient data request
+  private async handleDataRequest(response: string): Promise<any> {
+    try {
+      const dataRequest = JSON.parse(response.trim());
+      const { searchBy, value } = dataRequest;
+
+      // First try to find specific patient
+      const patientData = await this.fetchPatientData(searchBy, value);
+      
+      if (patientData) {
+        return patientData;
+      } else {
+        // If no patient found, get all patients' basic info
+        const allPatients = await this.fetchAllPatientsBasic();
+        return {
+          error: "Patient not found",
+          availablePatients: allPatients,
+          searchedFor: { searchBy, value }
+        };
+      }
+    } catch (error) {
+      console.error('Error handling data request:', error);
+      return null;
+    }
+  }
+
+  // Fetch specific patient data
+  private async fetchPatientData(searchBy: string, value: string): Promise<any> {
+    try {
+      const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      
+      if (searchBy === 'id') {
+        const response = await fetch(`${baseUrl}/patient/${value}`);
+        if (response.ok) {
+          const data = await response.json();
+          return data.patient;
+        }
+      } else {
+        // For name, phone, email - get all patients and filter
+        const response = await fetch(`${baseUrl}/patients`);
+        if (response.ok) {
+          const data = await response.json();
+          const patients = data.patients || [];
+          
+          const patient = patients.find((p: any) => {
+            switch (searchBy) {
+              case 'name':
+                return p.name?.toLowerCase().includes(value.toLowerCase());
+              case 'phone':
+                return p.phone === value;
+              case 'email':
+                return p.email?.toLowerCase() === value.toLowerCase();
+              default:
+                return false;
+            }
+          });
+          
+          return patient || null;
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('Error fetching patient data:', error);
+      return null;
+    }
+  }
+
+  // Fetch all patients' basic info
+  private async fetchAllPatientsBasic(): Promise<any[]> {
+    try {
+      const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${baseUrl}/patients/basic`);
+      if (response.ok) {
+        const data = await response.json();
+        return data.patients || [];
+      }
+      return [];
+    } catch (error) {
+      console.error('Error fetching all patients basic info:', error);
+      return [];
+    }
+  }
+
+  // Send message with patient data for analysis
+  private async sendMessageWithPatientData(originalMessage: string, patientData: any): Promise<string> {
+    try {
+      let contextMessage: string;
+      
+      if (patientData.error) {
+        // Patient not found - provide available patients
+        contextMessage = `The patient you asked about was not found. Here are the available patients in the system: ${JSON.stringify(patientData.availablePatients, null, 2)}. Please let the user know which patient they were looking for and suggest alternatives from the available patients.`;
+      } else {
+        // Patient found - provide data
+        contextMessage = `Here is the patient data for your analysis: ${JSON.stringify(patientData, null, 2)}. Please provide a comprehensive analysis of this patient based on their Ayurvedic profile, medical history, and current status. Focus on their dosha constitution, current conditions, medications, and provide relevant recommendations.`;
+      }
+
+      // Remove the data request from conversation history and add the context
+      this.conversationHistory.push({
+        role: 'user',
+        parts: [{ text: contextMessage }]
+      });
+
+      // Make another API call with the patient data
+      const requestBody = {
+        contents: this.conversationHistory,
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 2048,
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "object",
+            properties: {
+              dataNeeded: {
+                type: "boolean"
+              },
+              message: {
+                type: "string"
+              }
+            },
+            required: ["dataNeeded", "message"]
+          }
+        },
+        safetySettings: [
+          {
+            category: "HARM_CATEGORY_HARASSMENT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          },
+          {
+            category: "HARM_CATEGORY_HATE_SPEECH",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          },
+          {
+            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          },
+          {
+            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          }
+        ]
+      };
+
+      const response = await fetch(`${this.baseUrl}?key=${this.apiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Gemini API error: ${response.status}`);
+      }
+
+      const data: GeminiResponse = await response.json();
+      const finalResponseText = data.candidates[0].content.parts[0].text;
+
+      try {
+        // Parse structured response
+        const finalResponse = JSON.parse(finalResponseText);
+        const responseMessage = finalResponse.message || finalResponseText;
+
+        // Add final response to conversation history
+        this.conversationHistory.push({
+          role: 'model',
+          parts: [{ text: responseMessage }]
+        });
+
+        return this.formatResponse(responseMessage);
+      } catch (parseError) {
+        console.error('Error parsing final response:', parseError);
+        // Fallback to plain text
+        this.conversationHistory.push({
+          role: 'model',
+          parts: [{ text: finalResponseText }]
+        });
+
+        return this.formatResponse(finalResponseText);
+      }
+      
+    } catch (error) {
+      console.error('Error sending message with patient data:', error);
+      return this.getErrorResponse('Data Analysis Error', 
+        'I encountered an issue while analyzing the patient data. Please try your request again.');
+    }
   }
 }
 

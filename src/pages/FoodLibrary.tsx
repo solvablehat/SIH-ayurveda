@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -86,6 +86,13 @@ export default function FoodLibrary() {
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [loading, setLoading] = useState(true);
+  // Advanced filters
+  const [vata, setVata] = useState('');
+  const [pitta, setPitta] = useState('');
+  const [kapha, setKapha] = useState('');
+  const [caloriesMin, setCaloriesMin] = useState('');
+  const [caloriesMax, setCaloriesMax] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // Load food data from JSON file
@@ -104,6 +111,40 @@ export default function FoodLibrary() {
     
     loadFoodData();
   }, []);
+
+  // Only search when user presses Enter or clicks Search
+  const handleSearch = () => {
+    let filtered = foods;
+
+    // Name/category/benefits search
+    if (searchTerm) {
+      filtered = filtered.filter(food =>
+        food.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        food.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        food.ayurvedicBenefits.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Category filter
+    if (selectedCategory !== 'All Categories') {
+      filtered = filtered.filter(food => food.category === selectedCategory);
+    }
+
+    // Dosha filters
+    if (vata) filtered = filtered.filter(food => food.doshaEffects.vata >= parseFloat(vata));
+    if (pitta) filtered = filtered.filter(food => food.doshaEffects.pitta >= parseFloat(pitta));
+    if (kapha) filtered = filtered.filter(food => food.doshaEffects.kapha >= parseFloat(kapha));
+
+    // Calories filter
+    if (caloriesMin) filtered = filtered.filter(food => food.nutritionalValues.calories >= parseInt(caloriesMin));
+    if (caloriesMax) filtered = filtered.filter(food => food.nutritionalValues.calories <= parseInt(caloriesMax));
+
+    setFilteredFoods(filtered);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleSearch();
+  };
 
   useEffect(() => {
     filterFoods();
@@ -448,27 +489,35 @@ export default function FoodLibrary() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
           <Input
+            ref={searchInputRef}
             placeholder="Search foods, benefits, or properties..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={e => setSearchTerm(e.target.value)}
+            onKeyDown={handleKeyDown}
             className="pl-10"
           />
         </div>
-        
         <div className="flex items-center space-x-2">
           <Filter className="h-4 w-4 text-gray-400" />
           <select
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
+            onChange={e => setSelectedCategory(e.target.value)}
             className="px-3 py-2 border rounded-md"
           >
             {categories.map(category => (
-              <option key={category} value={category}>
-                {category}
-              </option>
+              <option key={category} value={category}>{category}</option>
             ))}
           </select>
         </div>
+        {/* Advanced filters */}
+        <div className="flex items-center space-x-2">
+          <Input type="number" min="0" max="1" step="0.1" value={vata} onChange={e => setVata(e.target.value)} placeholder="Vata ≥" className="w-20" onKeyDown={handleKeyDown} />
+          <Input type="number" min="0" max="1" step="0.1" value={pitta} onChange={e => setPitta(e.target.value)} placeholder="Pitta ≥" className="w-20" onKeyDown={handleKeyDown} />
+          <Input type="number" min="0" max="1" step="0.1" value={kapha} onChange={e => setKapha(e.target.value)} placeholder="Kapha ≥" className="w-20" onKeyDown={handleKeyDown} />
+          <Input type="number" min="0" value={caloriesMin} onChange={e => setCaloriesMin(e.target.value)} placeholder="Min Cal" className="w-20" onKeyDown={handleKeyDown} />
+          <Input type="number" min="0" value={caloriesMax} onChange={e => setCaloriesMax(e.target.value)} placeholder="Max Cal" className="w-20" onKeyDown={handleKeyDown} />
+        </div>
+        <Button onClick={handleSearch} className="h-10">Search</Button>
       </div>
 
       {/* Results Summary */}

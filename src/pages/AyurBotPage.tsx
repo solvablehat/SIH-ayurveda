@@ -13,13 +13,15 @@ import {
   BookOpen,
   Lightbulb,
   Users,
-  ChefHat
+  ChefHat,
+  X
 } from 'lucide-react';
 
 export default function AyurBotPage() {
   const navigate = useNavigate();
   const [isChatOpen, setIsChatOpen] = useState(true);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [selectedQuestion, setSelectedQuestion] = useState('');
 
   const exampleQuestions = [
     {
@@ -69,8 +71,8 @@ export default function AyurBotPage() {
   ];
 
   const handleExampleClick = (question: string) => {
-    // This would trigger the chatbot to process the question
-    // For now, we'll just open the chat
+    // Set the question to be passed to the chatbot
+    setSelectedQuestion(question);
     setIsChatOpen(true);
     setIsMinimized(false);
   };
@@ -290,12 +292,49 @@ export default function AyurBotPage() {
       </div>
 
       {/* AyurBot Chat Component */}
-      <AyurBot 
-        isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
-        isMinimized={isMinimized}
-        onToggleMinimize={() => setIsMinimized(!isMinimized)}
-      />
+      {isChatOpen && (
+        <div className="mt-8">
+          <Card className="bg-white border shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-green-50 to-blue-50 border-b">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-primary rounded-full">
+                    <Bot className="h-5 w-5 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold flex items-center space-x-2">
+                      <span>AyurBot Chat</span>
+                      <Sparkles className="h-5 w-5 text-yellow-500" />
+                    </h2>
+                    <p className="text-sm text-muted-foreground">Start your Ayurvedic consultation</p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  onClick={() => setIsChatOpen(false)}
+                  className="flex items-center space-x-2"
+                >
+                  <X className="h-4 w-4" />
+                  <span>Hide Chat</span>
+                </Button>
+              </div>
+            </CardHeader>
+            
+            {/* Chat Container */}
+            <div className="h-[600px]">
+              <AyurBot 
+                isOpen={true}
+                onClose={() => setIsChatOpen(false)}
+                isMinimized={false}
+                onToggleMinimize={() => {}}
+                selectedQuestion={selectedQuestion}
+                onQuestionProcessed={() => setSelectedQuestion('')}
+                isFullScreen={true}
+              />
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

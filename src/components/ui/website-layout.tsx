@@ -73,7 +73,7 @@ export function WebsiteLayout({ children }: WebsiteLayoutProps) {
       name: "AyurBot", 
       href: "/ayurbot", 
       icon: Bot,
-      current: location.pathname === "/compliance"
+      current: location.pathname === "/ayurbot"
     },
     { 
       name: "Profile", 

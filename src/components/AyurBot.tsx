@@ -41,9 +41,20 @@ interface ChatbotProps {
   onClose: () => void;
   isMinimized: boolean;
   onToggleMinimize: () => void;
+  selectedQuestion?: string;
+  onQuestionProcessed?: () => void;
+  isFullScreen?: boolean;
 }
 
-export default function AyurBot({ isOpen, onClose, isMinimized, onToggleMinimize }: ChatbotProps) {
+export default function AyurBot({ 
+  isOpen, 
+  onClose, 
+  isMinimized, 
+  onToggleMinimize,
+  selectedQuestion = '',
+  onQuestionProcessed,
+  isFullScreen = false
+}: ChatbotProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentMessage, setCurrentMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -95,6 +106,16 @@ export default function AyurBot({ isOpen, onClose, isMinimized, onToggleMinimize
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Handle selected question from AyurBot page
+  useEffect(() => {
+    if (selectedQuestion && selectedQuestion !== currentMessage) {
+      setCurrentMessage(selectedQuestion);
+      if (onQuestionProcessed) {
+        onQuestionProcessed();
+      }
+    }
+  }, [selectedQuestion, currentMessage, onQuestionProcessed]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -354,55 +375,191 @@ Would you like to try one of these examples?`;
 
   if (!isOpen) return null;
 
+  if (isFullScreen) {
+    return (
+      <div className="h-full w-full flex flex-col">
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={cn(
+                "flex gap-3",
+                message.type === 'user' ? 'justify-end' : 'justify-start'
+              )}
+            >
+              {message.type === 'bot' && (
+                <div className="p-2 bg-primary rounded-full self-start">
+                  <Bot className="h-4 w-4 text-primary-foreground" />
+                </div>
+              )}
+              
+              <div
+                className={cn(
+                  "max-w-[80%] rounded-lg p-3 text-sm",
+                  message.type === 'user'
+                    ? 'bg-primary text-primary-foreground ml-12'
+                    : 'bg-muted'
+                )}
+              >
+                {message.type === 'bot' ? (
+                  <div className="space-y-1">
+                    {formatMessage(message.content)}
+                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-border">
+                      <span className="text-xs text-muted-foreground">
+                        {message.timestamp.toLocaleTimeString()}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => isSpeaking ? stopSpeaking() : speakMessage(message.content)}
+                        className="h-6 w-6 p-0"
+                      >
+                        {isSpeaking ? <VolumeX className="h-3 w-3" /> : <Volume2 className="h-3 w-3" />}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <p>{message.content}</p>
+                    <span className="text-xs opacity-70 block mt-1">
+                      {message.timestamp.toLocaleTimeString()}
+                    </span>
+                  </div>
+                )}
+              </div>
+              
+              {message.type === 'user' && (
+                <div className="p-2 bg-primary rounded-full self-start">
+                  <User className="h-4 w-4 text-primary-foreground" />
+                </div>
+              )}
+            </div>
+          ))}
+          
+          {isLoading && (
+            <div className="flex gap-3">
+              <div className="p-2 bg-primary rounded-full">
+                <Bot className="h-4 w-4 text-primary-foreground" />
+              </div>
+              <div className="bg-muted rounded-lg p-3 flex items-center space-x-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-sm">AyurBot is thinking...</span>
+              </div>
+            </div>
+          )}
+          
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input */}
+        <div className="p-4 border-t bg-white">
+          <div className="flex items-center space-x-2">
+            <div className="flex-1 relative">
+              <Input
+                ref={inputRef}
+                value={currentMessage}
+                onChange={(e) => setCurrentMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask AyurBot anything about Ayurveda..."
+                disabled={isLoading}
+                className="pr-12"
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={isListening ? stopListening : startListening}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                disabled={isLoading}
+              >
+                {isListening ? (
+                  <MicOff className="h-4 w-4 text-red-500" />
+                ) : (
+                  <Mic className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+            
+            <Button 
+              onClick={sendMessage} 
+              disabled={!currentMessage.trim() || isLoading}
+              size="sm"
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+          
+          {isListening && (
+            <div className="mt-2 flex items-center justify-center">
+              <Badge variant="secondary" className="animate-pulse">
+                <Mic className="h-3 w-3 mr-1" />
+                Listening...
+              </Badge>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={cn(
       "fixed bottom-4 right-4 z-50 transition-all duration-300",
       isMinimized ? "w-80 h-16" : "w-96 h-[600px]"
     )}>
       <Card className="h-full shadow-2xl border-2 border-primary/20">
-        {/* Header */}
-        <CardHeader className="pb-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-t-lg">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="p-2 bg-primary rounded-full">
-                <Bot className="h-4 w-4 text-primary-foreground" />
+        {/* Header - Hide in full screen mode */}
+        {!isFullScreen && (
+          <CardHeader className="pb-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-t-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <div className="p-2 bg-primary rounded-full">
+                  <Bot className="h-4 w-4 text-primary-foreground" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg flex items-center space-x-2">
+                    <span>AyurBot</span>
+                    <Sparkles className="h-4 w-4 text-yellow-500" />
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    {isLoading ? 'AyurBot is thinking...' : 'Your AI Ayurvedic Assistant'}
+                  </p>
+                </div>
               </div>
-              <div>
-                <CardTitle className="text-lg flex items-center space-x-2">
-                  <span>AyurBot</span>
-                  <Sparkles className="h-4 w-4 text-yellow-500" />
-                </CardTitle>
-                <p className="text-xs text-muted-foreground">
-                  {isLoading ? 'AyurBot is thinking...' : 'Your AI Ayurvedic Assistant'}
-                </p>
+              
+              <div className="flex items-center space-x-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onToggleMinimize}
+                  className="h-8 w-8 p-0"
+                >
+                  {isMinimized ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onClose}
+                  className="h-8 w-8 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
             </div>
-            
-            <div className="flex items-center space-x-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onToggleMinimize}
-                className="h-8 w-8 p-0"
-              >
-                {isMinimized ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onClose}
-                className="h-8 w-8 p-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
+          </CardHeader>
+        )}
 
         {!isMinimized && (
           <>
             {/* Messages */}
-            <CardContent className="flex-1 overflow-y-auto p-4 space-y-4 h-[400px]">
+            <CardContent className={cn(
+              "flex-1 overflow-y-auto p-4 space-y-4",
+              isFullScreen ? "h-[calc(100vh-8rem)]" : "h-[400px]"
+            )}>
               {messages.map((message) => (
                 <div
                   key={message.id}
